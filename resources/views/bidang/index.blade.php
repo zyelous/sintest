@@ -1,98 +1,78 @@
 @extends('layouts.app')
-
 @section('title', 'Manajemen Bidang')
-
 @section('breadcrumb')
-    <a href="{{ route('dashboard') }}" class="text-slate-500 hover:text-blue-500 font-medium">Dashboard</a>
-    <span class="text-slate-300">/</span>
-    <span class="text-slate-800 font-semibold">Manajemen Bidang</span>
+<a href="{{ route('dashboard') }}" class="hover:text-primary">Manajemen</a> <span>/</span> <span class="text-slate-700 font-medium">Daftar Bidang</span>
 @endsection
-
 @section('content')
-    {{-- Page Header --}}
-    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+
+<div class="flex items-start justify-between mb-6 flex-wrap gap-3">
+    <div>
         <h1 class="text-2xl font-bold text-slate-800">Manajemen Bidang</h1>
-        <a href="{{ route('bidang.create') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition bg-gradient-to-r from-primary to-primary-light text-white shadow-sm hover:-translate-y-0.5">
-            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Tambah Bidang
-        </a>
+        <p class="text-sm text-slate-500 mt-1">Kelola struktur organisasi dan unit kerja Bappeda Provinsi Lampung.</p>
     </div>
+    <a href="{{ route('bidang.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition shadow-sm">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Tambah Bidang Baru
+    </a>
+</div>
 
-    {{-- Card --}}
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-            <h2 class="text-base font-semibold text-slate-700">Daftar Bidang</h2>
-            <span class="text-xs text-slate-400">Total: {{ $bidangList->total() }} bidang</span>
+<form method="GET" action="{{ route('bidang.index') }}" class="mb-6">
+    <div class="relative max-w-sm">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau kode bidang..." class="w-full bg-white rounded-lg border-slate-300 pl-9 text-sm focus:ring-primary focus:border-primary">
+    </div>
+</form>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-6 flex items-center justify-between">
+    <div>
+        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Total Bidang</p>
+        <p class="text-3xl font-bold text-slate-800 mt-1">{{ str_pad($bidangList->total(), 2, '0', STR_PAD_LEFT) }}</p>
+    </div>
+    <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    @forelse($bidangList as $b)
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+        <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="1"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
         </div>
-
-        <div class="p-6">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr>
-                            <th class="th-sintara w-12">No</th>
-                            <th class="th-sintara">Nama Bidang</th>
-                            <th class="th-sintara">Kode</th>
-                            <th class="th-sintara text-center">Jumlah User</th>
-                            <th class="th-sintara text-center">Jumlah Arsip</th>
-                            <th class="th-sintara w-28 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse ($bidangList as $i => $b)
-                            <tr class="hover:bg-slate-50/60 transition">
-                                <td class="td-sintara text-slate-500">{{ $bidangList->firstItem() + $i }}</td>
-                                <td class="td-sintara font-semibold text-slate-800">{{ $b->nama_bidang }}</td>
-                                <td class="td-sintara">
-                                    <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">{{ $b->kode_bidang }}</span>
-                                </td>
-                                <td class="td-sintara text-center text-slate-600">{{ $b->users_count }}</td>
-                                <td class="td-sintara text-center text-slate-600">{{ $b->arsip_count }}</td>
-                                <td class="td-sintara text-center">
-                                    <div class="inline-flex items-center gap-1">
-                                        <a href="{{ route('bidang.edit', $b->id) }}"
-                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
-                                           title="Edit">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
-                                            </svg>
-                                        </a>
-                                        <button type="button"
-                                                onclick="confirmDelete('{{ route('bidang.destroy', $b->id) }}')"
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
-                                                title="Hapus">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="td-sintara text-center text-slate-400 py-8">
-                                    <div class="flex flex-col items-center gap-2">
-                                        <svg class="w-10 h-10 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
-                                        </svg>
-                                        <span class="text-sm">Belum ada data bidang.</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        <h3 class="font-bold text-slate-800 text-lg">{{ $b->nama_bidang }}</h3>
+        <p class="text-xs text-slate-400 mb-4"># KODE: {{ $b->kode_bidang }}</p>
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100 mb-4">
+            <div>
+                <p class="text-[0.65rem] font-semibold text-slate-400 uppercase">Operator Utama</p>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ $b->users_count }} Personel</p>
             </div>
-
-            {{-- Pagination --}}
-            @if ($bidangList->hasPages())
-                <div class="mt-6">
-                    {{ $bidangList->links('components.pagination') }}
-                </div>
-            @endif
+            <div class="text-right">
+                <p class="text-[0.65rem] font-semibold text-slate-400 uppercase">Total Arsip</p>
+                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ number_format($b->arsip_count) }} Dokumen</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('bidang.edit', $b) }}" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                Edit
+            </a>
+            <button type="button" onclick="confirmDelete('{{ route('bidang.destroy', $b) }}')" class="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
         </div>
     </div>
+    @empty
+    <p class="text-slate-400 col-span-2 text-center py-10">Belum ada data bidang.</p>
+    @endforelse
+
+    <a href="{{ route('bidang.create') }}" class="border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center py-10 text-slate-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition">
+        <div class="w-11 h-11 rounded-full border-2 border-current flex items-center justify-center mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <p class="font-semibold text-sm">Tambah Unit</p>
+        <p class="text-xs mt-1 text-center px-6">Daftarkan sub-bidang atau unit kerja baru ke dalam sistem.</p>
+    </a>
+</div>
+
+<div class="mt-6">{{ $bidangList->links('components.pagination') }}</div>
 @endsection

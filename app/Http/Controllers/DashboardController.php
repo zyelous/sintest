@@ -22,9 +22,19 @@ class DashboardController extends Controller
             $totalSuratKeluar = SuratKeluar::count();
             $totalPeminjaman = PeminjamanArsip::where('status', 'dipinjam')->count();
             $arsipPerBidang = Bidang::withCount('arsip')->get();
+            $totalBoks = Arsip::whereNotNull('no_boks')->where('no_boks', '!=', '')->distinct('no_boks')->count('no_boks');
             $recentPeminjaman = PeminjamanArsip::with(['arsip.bidang'])
                 ->where('status', 'dipinjam')->latest()->take(5)->get();
             $recentSuratMasuk = SuratMasuk::with('bidang')->latest()->take(5)->get();
+
+            $monthlyGrowth = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $month = now()->subMonths($i);
+                $monthlyGrowth[] = [
+                    'label' => $month->translatedFormat('M'),
+                    'count' => Arsip::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->count(),
+                ];
+            }
         } else {
             $bidangId = $user->bidang_id;
             $totalArsip = Arsip::where('bidang_id', $bidangId)->count();
@@ -35,6 +45,15 @@ class DashboardController extends Controller
             $totalPeminjaman = PeminjamanArsip::whereHas('arsip', fn($q) => $q->where('bidang_id', $bidangId))
                 ->where('status', 'dipinjam')->count();
             $arsipPerBidang = null;
+            $totalBoks = Arsip::where('bidang_id', $bidangId)->whereNotNull('no_boks')->where('no_boks', '!=', '')->distinct('no_boks')->count('no_boks');
+            $monthlyGrowth = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $month = now()->subMonths($i);
+                $monthlyGrowth[] = [
+                    'label' => $month->translatedFormat('M'),
+                    'count' => Arsip::where('bidang_id', $bidangId)->whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->count(),
+                ];
+            }
             $recentPeminjaman = PeminjamanArsip::with(['arsip'])
                 ->whereHas('arsip', fn($q) => $q->where('bidang_id', $bidangId))
                 ->where('status', 'dipinjam')->latest()->take(5)->get();
@@ -44,7 +63,8 @@ class DashboardController extends Controller
         return view('dashboard.index', compact(
             'totalArsip', 'arsipAktif', 'arsipDipinjam',
             'totalSuratMasuk', 'totalSuratKeluar', 'totalPeminjaman',
-            'arsipPerBidang', 'recentPeminjaman', 'recentSuratMasuk'
+            'arsipPerBidang', 'recentPeminjaman', 'recentSuratMasuk',
+            'totalBoks', 'monthlyGrowth'
         ));
     }
 }

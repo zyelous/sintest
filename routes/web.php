@@ -42,8 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/surat-keluar/{surat_keluar}/download', [SuratKeluarController::class, 'download'])->name('surat-keluar.download');
 
     // Arsip
+    Route::get('/arsip/search', [ArsipController::class, 'search'])->name('arsip.search');
     Route::resource('arsip', ArsipController::class);
     Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
+
+    // Laporan
+    Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
 
     // Reports
     Route::get('/report/arsip/excel', [ReportController::class, 'exportExcel'])->name('report.arsip.excel');
