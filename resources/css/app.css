@@ -1,21 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 /* Custom base styles */
 @layer base {
   body {
     @apply font-sans antialiased;
   }
 }
-
 /* Reusable component classes via @apply */
 @layer components {
   /* Sidebar nav active state */
   .nav-active {
     @apply text-white bg-white/[0.12] border-l-[3px] border-l-blue-400;
   }
-
   /* Scrollbar for sidebar */
   .sidebar-scroll::-webkit-scrollbar {
     width: 4px;
@@ -24,7 +21,6 @@
     background: rgba(255,255,255,0.2);
     border-radius: 10px;
   }
-
   /* Table header styling */
   .th-sintara {
     @apply bg-primary text-white px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap;
