@@ -4,10 +4,61 @@ namespace App\Http\Controllers;
 
 use App\Models\Arsip;
 use App\Models\Bidang;
+use App\Models\SuratKeluar;
+use App\Models\SuratMasuk;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+
+        $arsipQuery = Arsip::query();
+        $suratMasukQuery = SuratMasuk::query();
+        $suratKeluarQuery = SuratKeluar::query();
+
+        if ($user->isOperator()) {
+            $arsipQuery->where('bidang_id', $user->bidang_id);
+            $suratMasukQuery->where('bidang_id', $user->bidang_id);
+            $suratKeluarQuery->where('bidang_id', $user->bidang_id);
+        } elseif ($request->filled('bidang_id')) {
+            $arsipQuery->where('bidang_id', $request->bidang_id);
+            $suratMasukQuery->where('bidang_id', $request->bidang_id);
+            $suratKeluarQuery->where('bidang_id', $request->bidang_id);
+        }
+
+        if ($request->filled('dari')) {
+            $arsipQuery->whereDate('tanggal_diarsipkan', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $arsipQuery->whereDate('tanggal_diarsipkan', '<=', $request->sampai);
+        }
+
+        $totalArsip = (clone $arsipQuery)->count();
+        $arsipAktif = (clone $arsipQuery)->where('status_retensi', 'aktif')->count();
+        $arsipInaktif = (clone $arsipQuery)->where('status_retensi', 'inaktif')->count();
+
+        $bidangList = $user->isAdmin() ? Bidang::orderBy('nama_bidang')->get() : collect([$user->bidang])->filter();
+
+        $rekap = $bidangList->map(function ($b) use ($user) {
+            $masuk = SuratMasuk::where('bidang_id', $b->id)->count();
+            $keluar = SuratKeluar::where('bidang_id', $b->id)->count();
+            $thisMonth = Arsip::where('bidang_id', $b->id)->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count();
+            $lastMonth = Arsip::where('bidang_id', $b->id)->whereYear('created_at', now()->subMonth()->year)->whereMonth('created_at', now()->subMonth()->month)->count();
+            $trend = $lastMonth > 0 ? round((($thisMonth - $lastMonth) / $lastMonth) * 100) : ($thisMonth > 0 ? 100 : 0);
+            return [
+                'bidang' => $b->nama_bidang,
+                'masuk' => $masuk,
+                'keluar' => $keluar,
+                'total' => $masuk + $keluar,
+                'trend' => $trend,
+            ];
+        });
+
+        return view('reports.index', compact('totalArsip', 'arsipAktif', 'arsipInaktif', 'rekap', 'bidangList'));
+    }
+
     public function exportExcel(Request $request)
     {
         $user = auth()->user();

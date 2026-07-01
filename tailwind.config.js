@@ -25,6 +25,11 @@ export default {
         accent: {
           DEFAULT: '#3B82F6',
           light: '#60A5FA',
+        },
+        'accent-gold': {
+          DEFAULT: '#F5B942',
+          light: '#FBD98C',
+          dark: '#D99A1F',
         }
       },
       fontFamily: {
@@ -53,5 +58,8 @@ export default {
       },
     },
   },
+  
+  
   plugins: [],
+  
 }

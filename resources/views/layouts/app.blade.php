@@ -19,7 +19,10 @@
         <div class="flex-1 ml-0 lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
             @include('components.navbar')
             @include('components.alert')
-            <main class="flex-1 p-4 sm:p-6 lg:p-8">
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 bg-slate-50">
+                @hasSection('breadcrumb')
+                <div class="flex items-center gap-1.5 text-xs text-slate-500 mb-4">@yield('breadcrumb')</div>
+                @endif
                 @yield('content')
             </main>
         </div>

@@ -1,140 +1,150 @@
 @extends('layouts.app')
-@section('title', 'Dashboard')
-@section('breadcrumb')<span class="text-slate-800 font-semibold">Dashboard</span>@endsection
-
+@section('title', 'Beranda')
 @section('content')
+
 <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
     <div>
-        <h1 class="text-2xl font-bold text-slate-800">Dashboard</h1>
-        <p class="text-sm text-slate-500">Selamat datang, {{ auth()->user()->name }}!</p>
+        <h1 class="text-2xl font-bold text-slate-800">{{ auth()->user()->isAdmin() ? 'Ringkasan Administrator' : 'Ringkasan Bidang' }}</h1>
+        <p class="text-sm text-slate-500 mt-1">{{ auth()->user()->isAdmin() ? 'Data agregat seluruh departemen di lingkup Bappeda Provinsi Lampung.' : 'Data arsip untuk bidang ' . (auth()->user()->bidang->nama_bidang ?? '-') . '.' }}</p>
     </div>
-</div>
-
-{{-- Stats --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-7">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex items-center gap-4 border-l-4 border-l-primary hover:shadow-md hover:-translate-y-0.5 transition-all">
-        <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg></div>
-        <div><p class="text-2xl font-extrabold text-slate-800 leading-none">{{ number_format($totalArsip) }}</p><p class="text-xs text-slate-500 mt-1">Total Arsip</p></div>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex items-center gap-4 border-l-4 border-l-emerald-500 hover:shadow-md hover:-translate-y-0.5 transition-all">
-        <div class="w-11 h-11 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-        <div><p class="text-2xl font-extrabold text-slate-800 leading-none">{{ number_format($arsipAktif) }}</p><p class="text-xs text-slate-500 mt-1">Arsip Aktif</p></div>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex items-center gap-4 border-l-4 border-l-amber-500 hover:shadow-md hover:-translate-y-0.5 transition-all">
-        <div class="w-11 h-11 rounded-lg bg-amber-50 flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <div><p class="text-2xl font-extrabold text-slate-800 leading-none">{{ number_format($arsipDipinjam) }}</p><p class="text-xs text-slate-500 mt-1">Dipinjam</p></div>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex items-center gap-4 border-l-4 border-l-cyan-500 hover:shadow-md hover:-translate-y-0.5 transition-all">
-        <div class="w-11 h-11 rounded-lg bg-cyan-50 flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
-        <div><p class="text-2xl font-extrabold text-slate-800 leading-none">{{ number_format($totalSuratMasuk) }}</p><p class="text-xs text-slate-500 mt-1">Surat Masuk</p></div>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex items-center gap-4 border-l-4 border-l-blue-500 hover:shadow-md hover:-translate-y-0.5 transition-all">
-        <div class="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
-        <div><p class="text-2xl font-extrabold text-slate-800 leading-none">{{ number_format($totalSuratKeluar) }}</p><p class="text-xs text-slate-500 mt-1">Surat Keluar</p></div>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex items-center gap-4 border-l-4 border-l-red-500 hover:shadow-md hover:-translate-y-0.5 transition-all">
-        <div class="w-11 h-11 rounded-lg bg-red-50 flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div>
-        <div><p class="text-2xl font-extrabold text-slate-800 leading-none">{{ number_format($totalPeminjaman) }}</p><p class="text-xs text-slate-500 mt-1">Pinjaman Aktif</p></div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    @if($arsipPerBidang)
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-800">Arsip per Bidang</h3></div>
-        <div class="p-6"><canvas id="arsipChart" height="250"></canvas></div>
-    </div>
+    @if(auth()->user()->isAdmin())
+    <form action="{{ route('arsip.import') }}" method="POST" enctype="multipart/form-data" id="importForm">
+        @csrf
+        <input type="file" name="file" id="importFile" accept=".csv,.xls,.xlsx" class="hidden" onchange="document.getElementById('importForm').submit()">
+        <button type="button" onclick="document.getElementById('importFile').click()" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition shadow-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel Import
+        </button>
+    </form>
     @endif
+</div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-            <h3 class="font-semibold text-slate-800">Peminjaman Aktif</h3>
-            <a href="{{ route('peminjaman.index') }}" class="text-xs font-semibold text-blue-500 hover:text-blue-700">Lihat Semua →</a>
+{{-- Stat cards --}}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><path d="M20 8v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8"/><path d="M22 8H2l1.5-4h17z"/></svg>
         </div>
-        <div class="p-0">
-            @if($recentPeminjaman->isEmpty())
-                <p class="text-sm text-slate-400 text-center py-8">Tidak ada peminjaman aktif.</p>
-            @else
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead><tr><th class="th-sintara">Arsip</th><th class="th-sintara">Peminjam</th><th class="th-sintara">Tgl Pinjam</th><th class="th-sintara">Status</th></tr></thead>
-                    <tbody>
-                        @foreach($recentPeminjaman as $p)
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="td-sintara font-medium">{{ $p->arsip->kode_klasifikasi }} - {{ $p->arsip->no_berkas }}</td>
-                            <td class="td-sintara">{{ $p->nama_peminjam }}</td>
-                            <td class="td-sintara">{{ $p->tanggal_pinjam->format('d/m/Y') }}</td>
-                            <td class="td-sintara">
-                                @if($p->tanggal_pinjam->diffInDays(now()) > 14)
-                                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700">Terlambat</span>
-                                @else
-                                    <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">Dipinjam</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            @endif
+        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Total Arsip</p>
+        <p class="text-3xl font-bold text-slate-800 mt-0.5">{{ number_format($totalArsip) }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><rect x="4" y="4" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="10" rx="1"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
         </div>
+        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">{{ auth()->user()->isAdmin() ? 'Bidang' : 'Surat Masuk' }}</p>
+        <p class="text-3xl font-bold text-slate-800 mt-0.5">{{ auth()->user()->isAdmin() ? number_format($arsipPerBidang->count()) : number_format($totalSuratMasuk) }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </div>
+        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Jumlah Boks</p>
+        <p class="text-3xl font-bold text-slate-800 mt-0.5">{{ number_format($totalBoks) }}</p>
     </div>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden mt-6">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 class="font-semibold text-slate-800">Surat Masuk Terbaru</h3>
-        <a href="{{ route('surat-masuk.index') }}" class="text-xs font-semibold text-blue-500 hover:text-blue-700">Lihat Semua →</a>
-    </div>
-    <div class="p-0">
-        @if($recentSuratMasuk->isEmpty())
-            <p class="text-sm text-slate-400 text-center py-8">Belum ada surat masuk.</p>
-        @else
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead><tr><th class="th-sintara">Nomor Surat</th><th class="th-sintara">Pengirim</th><th class="th-sintara">Tanggal</th><th class="th-sintara">Bidang</th><th class="th-sintara">Perihal</th></tr></thead>
-                <tbody>
-                    @foreach($recentSuratMasuk as $sm)
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="td-sintara font-semibold">{{ $sm->nomor_surat }}</td>
-                        <td class="td-sintara">{{ $sm->pengirim }}</td>
-                        <td class="td-sintara">{{ $sm->tanggal_surat->format('d/m/Y') }}</td>
-                        <td class="td-sintara"><span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-100 text-cyan-700">{{ $sm->bidang->nama_bidang ?? '-' }}</span></td>
-                        <td class="td-sintara">{{ Str::limit($sm->perihal, 50) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    {{-- Chart --}}
+    <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-1">
+            <h3 class="font-semibold text-slate-800">Pertumbuhan Arsip</h3>
         </div>
+        <p class="text-xs text-slate-400 mb-4">Analitik bulanan penambahan arsip fisik dan digital.</p>
+        <canvas id="growthChart" height="90"></canvas>
+    </div>
+
+    {{-- Sebaran / status --}}
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <h3 class="font-semibold text-slate-800 mb-1">{{ auth()->user()->isAdmin() ? 'Sebaran Departemen' : 'Status Arsip' }}</h3>
+        <p class="text-xs text-slate-400 mb-4">{{ auth()->user()->isAdmin() ? 'Distribusi volume arsip per bidang.' : 'Ringkasan status arsip bidang Anda.' }}</p>
+
+        @if(auth()->user()->isAdmin())
+            @php $maxCount = $arsipPerBidang->max('arsip_count') ?: 1; @endphp
+            <div class="space-y-4">
+                @foreach($arsipPerBidang->sortByDesc('arsip_count')->take(4) as $b)
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="font-medium text-slate-600">{{ $b->nama_bidang }}</span>
+                        <span class="text-slate-400">{{ number_format($b->arsip_count) }} items</span>
+                    </div>
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full" style="width: {{ $b->arsip_count > 0 ? max(4, round($b->arsip_count / $maxCount * 100)) : 0 }}%"></div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <a href="{{ route('bidang.index') }}" class="mt-5 block text-center text-sm font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg py-2.5 transition">Lihat Selengkapnya</a>
+        @else
+            <div class="space-y-4">
+                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Arsip Aktif</span><span class="font-semibold text-slate-800">{{ number_format($arsipAktif) }}</span></div>
+                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Sedang Dipinjam</span><span class="font-semibold text-slate-800">{{ number_format($arsipDipinjam) }}</span></div>
+                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Surat Keluar</span><span class="font-semibold text-slate-800">{{ number_format($totalSuratKeluar) }}</span></div>
+            </div>
         @endif
     </div>
 </div>
-@endsection
+
+{{-- Log / recent activity --}}
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-800">{{ auth()->user()->isAdmin() ? 'Log Aktivitas Sistem' : 'Surat Masuk Terbaru' }}</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-primary text-white text-xs uppercase tracking-wide">
+                    @if(auth()->user()->isAdmin())<th class="px-5 py-3 text-left font-semibold">Bidang</th>@endif
+                    <th class="px-5 py-3 text-left font-semibold">{{ auth()->user()->isAdmin() ? 'Aksi' : 'Perihal' }}</th>
+                    <th class="px-5 py-3 text-left font-semibold">Entitas</th>
+                    <th class="px-5 py-3 text-left font-semibold">Status</th>
+                    <th class="px-5 py-3 text-left font-semibold">Waktu</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @forelse($recentSuratMasuk as $s)
+                <tr class="hover:bg-slate-50">
+                    @if(auth()->user()->isAdmin())
+                    <td class="px-5 py-3.5">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary/10 text-primary text-[0.65rem] font-bold">{{ strtoupper(substr($s->bidang->kode_bidang ?? 'NA', 0, 2)) }}</span>
+                        <span class="ml-1 font-medium text-slate-700">{{ $s->bidang->nama_bidang ?? '-' }}</span>
+                    </td>
+                    @endif
+                    <td class="px-5 py-3.5 text-slate-600">{{ $s->perihal }}</td>
+                    <td class="px-5 py-3.5 text-primary font-medium">{{ $s->nomor_surat }}</td>
+                    <td class="px-5 py-3.5"><span class="px-2 py-1 rounded-full text-[0.7rem] font-semibold bg-emerald-100 text-emerald-700">{{ ucfirst($s->status) }}</span></td>
+                    <td class="px-5 py-3.5 text-slate-500">{{ $s->tanggal_diterima?->translatedFormat('d M Y') }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Belum ada data.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @push('scripts')
-@if($arsipPerBidang)
 <script>
-const ctx = document.getElementById('arsipChart');
-if (ctx) {
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode($arsipPerBidang->pluck('nama_bidang')) !!},
-            datasets: [{
-                label: 'Jumlah Arsip',
-                data: {!! json_encode($arsipPerBidang->pluck('arsip_count')) !!},
-                backgroundColor: ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4'],
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } }
+const growthCtx = document.getElementById('growthChart');
+new Chart(growthCtx, {
+    type: 'bar',
+    data: {
+        labels: {!! json_encode(collect($monthlyGrowth)->pluck('label')) !!},
+        datasets: [{
+            data: {!! json_encode(collect($monthlyGrowth)->pluck('count')) !!},
+            backgroundColor: '#1B3A5C',
+            borderRadius: 4,
+            maxBarThickness: 42,
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { precision: 0 } },
+            x: { grid: { display: false } }
         }
-    });
-}
+    }
+});
 </script>
-@endif
 @endpush
+@endsection

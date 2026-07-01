@@ -1,105 +1,123 @@
 @extends('layouts.app')
-@section('title', 'Data Arsip')
-@section('breadcrumb')<a href="{{ route('dashboard') }}">Dashboard</a> <span>/</span> <span>Data Arsip</span>@endsection
-
+@section('title', 'Manajemen Arsip')
 @section('content')
-<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-    <h1 class="text-2xl font-bold text-slate-800">Data Arsip</h1>
+
+<div class="flex items-start justify-between mb-6 flex-wrap gap-3">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800">{{ auth()->user()->isAdmin() ? 'Manajemen Semua Arsip' : 'Manajemen Arsip Bidang' }}</h1>
+        <p class="text-sm text-slate-500 mt-1">{{ auth()->user()->isAdmin() ? 'Kendali penuh atas seluruh data arsip dari semua bidang.' : 'Kelola data arsip untuk bidang ' . (auth()->user()->bidang->nama_bidang ?? '-') . '.' }}</p>
+    </div>
     <div class="flex items-center gap-2">
-        <a href="{{ route('report.arsip.excel') }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg transition bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-sm hover:-translate-y-0.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export Excel
-        </a>
-        <a href="{{ route('report.arsip.pdf') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm hover:-translate-y-0.5">PDF</a>
-        <a href="{{ route('arsip.create') }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg transition bg-gradient-to-r from-primary to-primary-light text-white shadow-sm hover:-translate-y-0.5">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Tambah Arsip
+        <button type="button" onclick="document.getElementById('filterPanel').classList.toggle('hidden')" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition shadow-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filter Bidang
+        </button>
+        <a href="{{ route('arsip.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition shadow-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Arsip Baru
         </a>
     </div>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-    <div class="p-6">
-        {{-- Filter Bar --}}
-        <form method="GET" class="flex flex-wrap gap-3 items-center pb-4 border-b border-slate-100">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode, nomor, uraian..." class="w-full sm:w-auto flex-1 min-w-[200px] px-3 py-2.5 border-[1.5px] border-slate-200 rounded-lg text-sm outline-none transition focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-            @if(auth()->user()->isAdmin())
-            <select name="bidang_id" class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-lg text-sm outline-none transition focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" onchange="this.form.submit()">
-                <option value="">-- Bidang --</option>
+@if(auth()->user()->isAdmin())
+<div class="flex items-start gap-3 bg-primary/5 border border-primary/10 rounded-xl px-5 py-4 mb-6">
+    <div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    </div>
+    <div>
+        <p class="text-sm font-semibold text-primary">Mode Administrator Aktif</p>
+        <p class="text-xs text-slate-500 mt-0.5">Anda dapat melihat, mengubah, dan menghapus seluruh data arsip lintas bidang. Perubahan akan dicatat di log sistem.</p>
+    </div>
+</div>
+@endif
+
+<div id="filterPanel" class="hidden bg-white rounded-xl border border-slate-200 p-5 mb-6 shadow-sm">
+    <form method="GET" action="{{ route('arsip.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+        <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Cari</label>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode, no. berkas, uraian..." class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        </div>
+        @if(auth()->user()->isAdmin())
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Bidang</label>
+            <select name="bidang_id" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+                <option value="">Semua Bidang</option>
                 @foreach($bidangList as $b)
                 <option value="{{ $b->id }}" {{ request('bidang_id') == $b->id ? 'selected' : '' }}>{{ $b->nama_bidang }}</option>
                 @endforeach
             </select>
-            @endif
-            <select name="status_retensi" class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-lg text-sm outline-none transition focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" onchange="this.form.submit()">
-                <option value="">-- Retensi --</option>
-                <option value="aktif" {{ request('status_retensi') === 'aktif' ? 'selected' : '' }}>Aktif</option>
-                <option value="inaktif" {{ request('status_retensi') === 'inaktif' ? 'selected' : '' }}>Inaktif</option>
-            </select>
-            <select name="status_arsip" class="px-3 py-2.5 border-[1.5px] border-slate-200 rounded-lg text-sm outline-none transition focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" onchange="this.form.submit()">
-                <option value="">-- Status --</option>
-                <option value="tersedia" {{ request('status_arsip') === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                <option value="dipinjam" {{ request('status_arsip') === 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-            </select>
-            <button type="submit" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition bg-gradient-to-r from-primary to-primary-light text-white shadow-sm hover:-translate-y-0.5">Cari</button>
-            @if(request()->hasAny(['search','bidang_id','status_retensi','status_arsip','klasifikasi_keamanan']))
-            <a href="{{ route('arsip.index') }}" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition border border-slate-300 text-slate-600 hover:bg-slate-50">Reset</a>
-            @endif
-        </form>
-
-        {{-- Table --}}
-        <div class="overflow-x-auto mt-4">
-            <table class="w-full">
-                <thead>
-                    <tr>
-                        <th class="th-sintara">No</th>
-                        <th class="th-sintara">Kode Klasifikasi</th>
-                        <th class="th-sintara">No. Berkas</th>
-                        <th class="th-sintara">Uraian</th>
-                        <th class="th-sintara">Tgl Arsip</th>
-                        <th class="th-sintara">Umur Arsip</th>
-                        <th class="th-sintara">Retensi</th>
-                        <th class="th-sintara">Status</th>
-                        <th class="th-sintara">Bidang</th>
-                        <th class="th-sintara">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($arsipList as $i => $a)
-                    <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
-                        <td class="td-sintara">{{ $arsipList->firstItem() + $i }}</td>
-                        <td class="td-sintara font-bold text-slate-800">{{ $a->kode_klasifikasi }}</td>
-                        <td class="td-sintara">{{ $a->no_berkas }}</td>
-                        <td class="td-sintara">{{ Str::limit($a->uraian_berkas, 40) }}</td>
-                        <td class="td-sintara">{{ $a->tanggal_diarsipkan?->format('d/m/Y') }}</td>
-                        <td class="td-sintara">
-                            @php $umurHari = $a->umur_hari; @endphp
-                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $umurHari > 1825 ? 'bg-red-100 text-red-700' : ($umurHari > 365 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700') }}">{{ $a->umur_arsip }}</span>
-                        </td>
-                        <td class="td-sintara">
-                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $a->status_retensi === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">{{ ucfirst($a->status_retensi) }}</span>
-                        </td>
-                        <td class="td-sintara">
-                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $a->status_arsip === 'tersedia' ? 'bg-cyan-100 text-cyan-700' : 'bg-amber-100 text-amber-700' }}">{{ ucfirst($a->status_arsip) }}</span>
-                        </td>
-                        <td class="td-sintara">{{ $a->bidang->nama_bidang ?? '-' }}</td>
-                        <td class="td-sintara">
-                            <div class="flex items-center gap-1">
-                                <a href="{{ route('arsip.show', $a) }}" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition bg-gradient-to-r from-cyan-500 to-cyan-600 text-white hover:-translate-y-0.5">Lihat</a>
-                                <a href="{{ route('arsip.edit', $a) }}" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:-translate-y-0.5">Edit</a>
-                                <button class="px-3 py-1.5 text-xs font-semibold rounded-lg transition bg-gradient-to-r from-red-500 to-red-600 text-white hover:-translate-y-0.5" onclick="confirmDelete('{{ route('arsip.destroy', $a) }}')">Hapus</button>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="10" class="td-sintara text-center text-slate-400">Tidak ada data arsip.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
-        <div class="text-xs text-slate-500 mt-4">Menampilkan {{ $arsipList->firstItem() ?? 0 }} - {{ $arsipList->lastItem() ?? 0 }} dari {{ $arsipList->total() }} data</div>
+        @endif
+        <button type="submit" class="px-4 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition">Terapkan</button>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <p class="text-sm text-slate-600"><span class="font-semibold text-slate-800">{{ number_format($arsipList->total()) }}</span> Total Arsip {{ auth()->user()->isAdmin() ? '(Semua Bidang)' : '' }}</p>
+        <div class="flex items-center gap-1">
+            <a href="{{ route('report.arsip.excel') }}" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition" title="Export Excel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </a>
+            <a href="{{ route('report.arsip.pdf') }}" target="_blank" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition" title="Cetak PDF">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-primary text-white text-xs uppercase tracking-wide">
+                    <th class="px-5 py-3 text-left font-semibold whitespace-nowrap">No. Arsip</th>
+                    <th class="px-5 py-3 text-left font-semibold">Judul & Bidang</th>
+                    <th class="px-5 py-3 text-left font-semibold whitespace-nowrap">Tanggal</th>
+                    <th class="px-5 py-3 text-left font-semibold whitespace-nowrap">Lokasi</th>
+                    <th class="px-5 py-3 text-left font-semibold whitespace-nowrap">Status</th>
+                    <th class="px-5 py-3 text-right font-semibold whitespace-nowrap">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @forelse($arsipList as $arsip)
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3.5 font-semibold text-primary whitespace-nowrap">{{ $arsip->no_berkas }}</td>
+                    <td class="px-5 py-3.5">
+                        <p class="font-semibold text-slate-800">{{ $arsip->uraian_berkas }}</p>
+                        <div class="flex items-center gap-1.5 mt-1">
+                            <span class="px-1.5 py-0.5 rounded text-[0.65rem] font-bold bg-slate-100 text-slate-500 uppercase">{{ $arsip->kode_klasifikasi }}</span>
+                            <span class="text-xs text-slate-400">{{ $arsip->bidang->nama_bidang ?? '-' }}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-slate-600 whitespace-nowrap">{{ $arsip->tanggal_diarsipkan?->translatedFormat('d M Y') }}</td>
+                    <td class="px-5 py-3.5 whitespace-nowrap">
+                        <span class="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">Rak-{{ $arsip->no_rak ?: '-' }} / Boks-{{ $arsip->no_boks ?: '-' }}</span>
+                    </td>
+                    <td class="px-5 py-3.5 whitespace-nowrap">
+                        @php
+                            $statusColor = match($arsip->status_arsip) {
+                                'dipinjam' => 'bg-amber-100 text-amber-700',
+                                default => 'bg-emerald-100 text-emerald-700',
+                            };
+                        @endphp
+                        <span class="px-2.5 py-1 rounded-full text-[0.7rem] font-semibold {{ $statusColor }}">{{ $arsip->status_arsip === 'dipinjam' ? 'Dipinjam' : 'Tersedia' }}</span>
+                    </td>
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center justify-end gap-1">
+                            <a href="{{ route('arsip.show', $arsip) }}" class="p-1.5 rounded-md text-slate-400 hover:bg-slate-100 hover:text-primary transition" title="Lihat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                            <a href="{{ route('arsip.edit', $arsip) }}" class="p-1.5 rounded-md text-slate-400 hover:bg-slate-100 hover:text-amber-600 transition" title="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></a>
+                            <button type="button" onclick="confirmDelete('{{ route('arsip.destroy', $arsip) }}')" class="p-1.5 rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 transition" title="Hapus"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Belum ada data arsip.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="px-5 py-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
+        <p class="text-xs text-slate-400">Menampilkan {{ $arsipList->firstItem() ?? 0 }}-{{ $arsipList->lastItem() ?? 0 }} dari {{ number_format($arsipList->total()) }} data</p>
         {{ $arsipList->links('components.pagination') }}
     </div>
 </div>
