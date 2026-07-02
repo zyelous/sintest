@@ -18,6 +18,12 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     <h3 class="font-semibold text-slate-800">Identitas Berkas & Surat</h3>
                 </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Import dari Excel (Opsional)</label>
+                    <input type="file" id="excelFile" accept=".xlsx,.xls" 
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="text-xs text-gray-500 mt-1">Upload file Excel, data akan otomatis terisi ke form</p>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kode Klasifikasi <span class="text-red-500">*</span></label>
@@ -158,4 +164,78 @@
         </div>
     </div>
 </form>
+<script>
+document.getElementById('excelFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // First get a preview to map columns
+    fetch('{{ route('arsip.preview') }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.status === 'success' && result.data.length > 0) {
+            const row = result.data[0];
+
+            // Fill form with first row for visual confirmation
+            setValue('kode_klasifikasi', row['Kode Klasifikasi '] || '');
+            setValue('no_berkas', row['No. Berkas '] || '');
+            setValue('uraian_berkas', row['Uraian Informasi Berkas '] || '');
+            setValue('uraian_arsip', row['Uraian Informasi Arsip'] || '');
+            setValue('tanggal_diarsipkan', row['Tanggal Diarsipkan'] ? row['Tanggal Diarsipkan'].split('T')[0] : '');
+            setValue('jumlah_halaman_bundle', row['Jumlah Halaman/ Map/ Bundle'] || '');
+            setValue('jumlah_berkas', row['Jumlah Berkas'] || '1');
+            setValue('no_item_arsip', row['No. Item Arsip'] || '');
+            setValue('lokasi_simpan', row['Keterangan Lokasi Simpan'] || '');
+            setValue('no_rak', row['No. Rak'] || '');
+            setValue('no_boks', row['No. Boks'] || '');
+            setValue('no_folder', row['No. Folder'] || '');
+
+            // Ask user if they want to import all rows directly
+            if (confirm('Data dari Excel dimuat. Apakah Anda ingin langsung mengimpor semua baris ke database?')) {
+                // Rebuild formdata to send file to import route
+                const importData = new FormData();
+                importData.append('file', file);
+
+                fetch('{{ route('arsip.import') }}', {
+                    method: 'POST',
+                    body: importData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(res => res.json())
+                .then(resp => {
+                    if (resp.status === 'success') {
+                        alert('✅ Import berhasil. Total arsip sekarang: ' + resp.count);
+                        // Optional: redirect to index
+                        window.location.href = '{{ route('arsip.index') }}';
+                    } else {
+                        alert('Import gagal: ' + (resp.message || JSON.stringify(resp)));
+                    }
+                })
+                .catch(err => alert('Gagal mengimpor: ' + err));
+            } else {
+                alert('Anda dapat meninjau formulir sebelum menyimpan manual.');
+            }
+        } else {
+            alert('Tidak ada data yang ditemukan di file Excel.');
+        }
+    })
+    .catch(err => alert('Gagal membaca file: ' + err));
+});
+
+function setValue(name, value) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (el) el.value = value;
+}
+</script>
 @endsection
