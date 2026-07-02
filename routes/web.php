@@ -10,6 +10,7 @@ use App\Http\Controllers\SuratKeluarController;
 use App\Http\Controllers\SuratMasukController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ArsipImportController;
 
 // Redirect root to login
 Route::get('/', fn() => redirect()->route('login'));
@@ -30,10 +31,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
         Route::put('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::resource('bidang', BidangController::class);
-        Route::post('/arsip/import', [ReportController::class, 'importExcel'])->name('arsip.import');
     });
 
     // Surat Masuk
+    Route::post('/surat-masuk/preview', [SuratMasukController::class, 'previewImport'])->name('surat-masuk.preview');
+    Route::post('/surat-masuk/import', [SuratMasukController::class, 'importFromExcel'])->name('surat-masuk.import');
     Route::resource('surat-masuk', SuratMasukController::class);
     Route::get('/surat-masuk/{surat_masuk}/download', [SuratMasukController::class, 'download'])->name('surat-masuk.download');
 
@@ -42,10 +44,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/surat-keluar/{surat_keluar}/download', [SuratKeluarController::class, 'download'])->name('surat-keluar.download');
 
     // Arsip
+    Route::get('/arsip/create', fn() => redirect()->route('surat-masuk.create'))->name('arsip.create');
     Route::get('/arsip/search', [ArsipController::class, 'search'])->name('arsip.search');
-    Route::resource('arsip', ArsipController::class);
+    Route::resource('arsip', ArsipController::class, ['except' => ['create']]);
     Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
 
+    // Import Excel Arsip
+    Route::post('/arsip/preview', [ArsipImportController::class, 'preview'])->name('arsip.preview');
+    Route::post('/arsip/import', [ArsipImportController::class, 'import'])->name('arsip.import');
     // Laporan
     Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
 

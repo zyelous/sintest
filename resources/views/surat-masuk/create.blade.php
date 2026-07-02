@@ -7,7 +7,37 @@
 
 <p class="text-xs font-semibold text-primary uppercase tracking-wide mb-1">Arsip Surat</p>
 <h1 class="text-2xl font-bold text-slate-800 mb-1">Registrasi Surat Masuk</h1>
-<p class="text-sm text-slate-500 mb-6">Silakan lengkapi detail surat yang diterima.</p>
+<p class="text-sm text-slate-500 mb-6">Silakan lengkapi detail surat yang diterima atau impor dari Excel.</p>
+
+{{-- Import Excel Section --}}
+<div class="mb-6 bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <div class="flex items-center gap-2 mb-4">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <h3 class="font-semibold text-slate-800">Import dari Excel (Surat Masuk)</h3>
+    </div>
+    <p class="text-xs text-slate-500 mb-4">Pilih file Excel untuk mengimpor satu atau beberapa surat masuk sekaligus.</p>
+    <div class="grid grid-cols-1 gap-3">
+        <input type="file" id="excelFile" accept=".xlsx,.xls,.xlsv,.csv" class="rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        @if(auth()->user()->isOperator())
+            <input type="hidden" id="importBidangId" value="{{ auth()->user()->bidang_id }}">
+        @else
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Bidang Tujuan untuk Import</label>
+                <select id="importBidangId" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+                    <option value="">Pilih Bidang (jika diimport sebagai arsip)</option>
+                    @foreach($bidangList as $b)
+                        <option value="{{ $b->id }}">{{ $b->nama_bidang }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+        <button type="button" onclick="uploadExcel()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800 transition">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Import
+        </button>
+    </div>
+    <div id="importResult" class="mt-3 text-sm"></div>
+</div>
 
 <form method="POST" action="{{ route('surat-masuk.store') }}" enctype="multipart/form-data">
     @csrf
@@ -112,15 +142,6 @@
                     </div>
                 @endif
             </div>
-            <!-- Di dalam form Create Surat Masuk -->
-            <div class="card">
-                <h3>Import dari Excel (Arsip Aktif)</h3>
-                
-                <input type="file" id="excelFile" accept=".xlsx,.xls">
-                <button type="button" onclick="uploadExcel()">Import Sekarang</button>
-                
-                <div id="importResult"></div>
-            </div>
 
             <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition shadow-sm">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -129,4 +150,84 @@
         </div>
     </div>
 </form>
+<script>
+function uploadExcel() {
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+    const resultBox = document.getElementById('importResult');
+    resultBox.textContent = '';
+    if (!file) {
+        resultBox.textContent = 'Pilih file Excel terlebih dahulu.';
+        return;
+    }
+
+    const previewData = new FormData();
+    previewData.append('file', file);
+
+    fetch('{{ route('surat-masuk.preview') }}', {
+        method: 'POST',
+        body: previewData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status !== 'success') {
+            resultBox.textContent = 'Pratinjau gagal: ' + (data.message || 'Format file tidak dikenali.');
+            return;
+        }
+
+        if (!data.preview || data.preview.length === 0) {
+            resultBox.textContent = 'Tidak ada data di file Excel.';
+            return;
+        }
+
+        // show header diagnostics
+        const headers = data.headers_found || [];
+        const diag = document.createElement('div');
+        diag.className = 'mb-2';
+        diag.innerHTML = `<strong>Header terdeteksi:</strong> ${headers.join(', ')}`;
+        resultBox.appendChild(diag);
+
+        if (!confirm('Data Excel sudah dibaca. Apakah Anda ingin mengimpor semua baris ke database?')) {
+            resultBox.textContent = 'Impor dibatalkan. Periksa ulang file atau isi formulir secara manual.';
+            return;
+        }
+
+        const importData = new FormData();
+        importData.append('file', file);
+        const bidangInput = document.getElementById('importBidangId');
+        if (bidangInput && bidangInput.value) {
+            importData.append('bidang_id', bidangInput.value);
+        }
+
+        fetch('{{ route('surat-masuk.import') }}', {
+            method: 'POST',
+            body: importData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(resp => {
+            if (resp.status === 'success') {
+                const messageType = resp.type === 'arsip' ? 'arsip' : 'surat masuk';
+                resultBox.textContent = `Impor selesai: ${resp.created} ${messageType} berhasil, ${resp.skipped} dilewati.`;
+                if (resp.created > 0) {
+                    setTimeout(() => window.location.href = '{{ route('surat-masuk.index') }}', 1500);
+                }
+            } else {
+                resultBox.textContent = 'Impor gagal: ' + (resp.message || JSON.stringify(resp));
+            }
+        })
+        .catch(error => {
+            resultBox.textContent = 'Gagal mengimpor: ' + error;
+        });
+    })
+    .catch(error => {
+        resultBox.textContent = 'Gagal membaca file: ' + error;
+    });
+}
+</script>
 @endsection
