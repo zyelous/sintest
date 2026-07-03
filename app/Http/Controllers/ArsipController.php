@@ -120,6 +120,10 @@ class ArsipController extends Controller
         ]);
 
         $data = $request->except('file_arsip');
+        if (isset($data['jumlah_halaman_bundle'])) {
+            $cleaned = preg_replace('/[^0-9]/', '', (string)$data['jumlah_halaman_bundle']);
+            $data['jumlah_halaman_bundle'] = $cleaned !== '' ? (int)$cleaned : null;
+        }
         $data['user_id'] = auth()->id();
         $data['status_arsip'] = 'tersedia';
 
@@ -183,6 +187,10 @@ class ArsipController extends Controller
         ]);
 
         $data = $request->except('file_arsip');
+        if (isset($data['jumlah_halaman_bundle'])) {
+            $cleaned = preg_replace('/[^0-9]/', '', (string)$data['jumlah_halaman_bundle']);
+            $data['jumlah_halaman_bundle'] = $cleaned !== '' ? (int)$cleaned : null;
+        }
 
         if ($request->hasFile('file_arsip')) {
             if ($arsip->file_arsip) {
