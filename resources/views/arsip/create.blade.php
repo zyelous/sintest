@@ -20,9 +20,9 @@
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Import dari Excel (Opsional)</label>
-                    <input type="file" id="excelFile" accept=".xlsx,.xls" 
+                    <input type="file" id="excelFile" accept=".xlsx,.xls,.xlsv,.csv" 
                         class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    <p class="text-xs text-gray-500 mt-1">Upload file Excel, data akan otomatis terisi ke form</p>
+                    <p class="text-xs text-gray-500 mt-1">Upload file Excel atau .xlsv (TSV), data akan otomatis terisi ke form</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -185,19 +185,31 @@ document.getElementById('excelFile').addEventListener('change', function(e) {
         if (result.status === 'success' && result.data.length > 0) {
             const row = result.data[0];
 
+            const getValueFromRow = (keys) => {
+                for (let k of keys) {
+                    if (row[k] !== undefined && row[k] !== null) return row[k];
+                    let tk = k.trim();
+                    if (row[tk] !== undefined && row[tk] !== null) return row[tk];
+                }
+                return '';
+            };
+
             // Fill form with first row for visual confirmation
-            setValue('kode_klasifikasi', row['Kode Klasifikasi '] || '');
-            setValue('no_berkas', row['No. Berkas '] || '');
-            setValue('uraian_berkas', row['Uraian Informasi Berkas '] || '');
-            setValue('uraian_arsip', row['Uraian Informasi Arsip'] || '');
-            setValue('tanggal_diarsipkan', row['Tanggal Diarsipkan'] ? row['Tanggal Diarsipkan'].split('T')[0] : '');
-            setValue('jumlah_halaman_bundle', row['Jumlah Halaman/ Map/ Bundle'] || '');
-            setValue('jumlah_berkas', row['Jumlah Berkas'] || '1');
-            setValue('no_item_arsip', row['No. Item Arsip'] || '');
-            setValue('lokasi_simpan', row['Keterangan Lokasi Simpan'] || '');
-            setValue('no_rak', row['No. Rak'] || '');
-            setValue('no_boks', row['No. Boks'] || '');
-            setValue('no_folder', row['No. Folder'] || '');
+            setValue('kode_klasifikasi', getValueFromRow(['Kode Klasifikasi ', 'Kode Klasifikasi', 'kode_klasifikasi']));
+            setValue('no_berkas', getValueFromRow(['No. Berkas ', 'No. Berkas', 'no_berkas']));
+            setValue('uraian_berkas', getValueFromRow(['Uraian Informasi Berkas ', 'Uraian Informasi Berkas', 'uraian_berkas', 'uraian_informasi_berkas']));
+            setValue('uraian_arsip', getValueFromRow(['Uraian Informasi Arsip', 'Uraian Informasi Arsip ', 'uraian_arsip', 'uraian_informasi_arsip']));
+            
+            const rawDate = getValueFromRow(['Tanggal Diarsipkan', 'Tanggal Diarsipkan ', 'tanggal_diarsipkan', 'tanggal_arsip']);
+            setValue('tanggal_diarsipkan', rawDate ? rawDate.split('T')[0] : '');
+
+            setValue('jumlah_halaman_bundle', getValueFromRow(['Jumlah Halaman/ Map/ Bundle', 'Jumlah Halaman/Map/Bundle', 'jumlah_halaman_bundle', 'jumlah_halaman']));
+            setValue('jumlah_berkas', getValueFromRow(['Jumlah Berkas', 'Jumlah Berkas ', 'jumlah_berkas']) || '1');
+            setValue('no_item_arsip', getValueFromRow(['No. Item Arsip', 'No. Item Arsip ', 'no_item_arsip']));
+            setValue('lokasi_simpan', getValueFromRow(['Keterangan Lokasi Simpan', 'Keterangan Lokasi Simpan ', 'lokasi_simpan', 'keterangan_lokasi_simpan']));
+            setValue('no_rak', getValueFromRow(['No. Rak', 'No. Rak ', 'no_rak']));
+            setValue('no_boks', getValueFromRow(['No. Boks', 'No. Boks ', 'no_boks']));
+            setValue('no_folder', getValueFromRow(['No. Folder', 'No. Folder ', 'no_folder']));
 
             // Ask user if they want to import all rows directly
             if (confirm('Data dari Excel dimuat. Apakah Anda ingin langsung mengimpor semua baris ke database?')) {
