@@ -144,11 +144,21 @@
                        class="px-4 py-2 text-sm font-semibold rounded-lg transition border border-slate-300 text-slate-600 hover:bg-slate-50">
                         Batal
                     </a>
+                    <button type="button"
+                            onclick="if(confirm('Apakah Anda yakin ingin mereset password {{ $user->name }} ke \'password123\'?')) document.getElementById('resetPasswordForm').submit();"
+                            class="px-4 py-2 text-sm font-semibold rounded-lg transition border border-amber-300 text-amber-600 hover:bg-amber-50">
+                        Reset Password (password123)
+                    </button>
                     <button type="submit"
                             class="px-4 py-2 text-sm font-semibold rounded-lg transition bg-gradient-to-r from-primary to-primary-light text-white shadow-sm hover:-translate-y-0.5">
                         Perbarui
                     </button>
                 </div>
+            </form>
+
+            <form id="resetPasswordForm" action="{{ route('users.reset-password', $user->id) }}" method="POST" class="hidden">
+                @csrf
+                @method('PUT')
             </form>
         </div>
     </div>

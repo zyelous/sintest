@@ -32,7 +32,11 @@
 @endif
 
 <div id="filterPanel" class="hidden bg-white rounded-xl border border-slate-200 p-5 mb-6 shadow-sm">
-    <form method="GET" action="{{ route('arsip.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-slate-700">Filter Lanjutan</h3>
+        <a href="{{ route('arsip.index') }}" class="text-xs font-semibold text-primary hover:underline">Reset Filter</a>
+    </div>
+    <form method="GET" action="{{ route('arsip.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="sm:col-span-2">
             <label class="block text-xs font-semibold text-slate-500 mb-1.5">Cari</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode, no. berkas, uraian..." class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
@@ -48,7 +52,55 @@
             </select>
         </div>
         @endif
-        <button type="submit" class="px-4 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition">Terapkan</button>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Kode Klasifikasi</label>
+            <input type="text" name="kode_klasifikasi" value="{{ request('kode_klasifikasi') }}" placeholder="Contoh: 005/TU" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Status Retensi</label>
+            <select name="status_retensi" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+                <option value="">Semua</option>
+                <option value="aktif" {{ request('status_retensi') === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                <option value="inaktif" {{ request('status_retensi') === 'inaktif' ? 'selected' : '' }}>Inaktif</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Klasifikasi Keamanan</label>
+            <select name="klasifikasi_keamanan" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+                <option value="">Semua</option>
+                <option value="biasa" {{ request('klasifikasi_keamanan') === 'biasa' ? 'selected' : '' }}>Biasa</option>
+                <option value="terbatas" {{ request('klasifikasi_keamanan') === 'terbatas' ? 'selected' : '' }}>Terbatas</option>
+                <option value="rahasia" {{ request('klasifikasi_keamanan') === 'rahasia' ? 'selected' : '' }}>Rahasia</option>
+                <option value="sangat_rahasia" {{ request('klasifikasi_keamanan') === 'sangat_rahasia' ? 'selected' : '' }}>Sangat Rahasia</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Status Arsip</label>
+            <select name="status_arsip" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+                <option value="">Semua</option>
+                <option value="tersedia" {{ request('status_arsip') === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                <option value="dipinjam" {{ request('status_arsip') === 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">No. Rak</label>
+            <input type="text" name="no_rak" value="{{ request('no_rak') }}" placeholder="No. Rak" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">No. Boks</label>
+            <input type="text" name="no_boks" value="{{ request('no_boks') }}" placeholder="No. Boks" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        </div>
+        <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Rentang Tanggal Diarsipkan</label>
+            <div class="flex items-center gap-1.5">
+                <input type="date" name="dari" value="{{ request('dari') }}" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+                <span class="text-slate-300">–</span>
+                <input type="date" name="sampai" value="{{ request('sampai') }}" class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+            </div>
+        </div>
+        <div class="sm:col-span-2 lg:col-span-4 flex justify-end">
+            <button type="submit" class="px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition">Terapkan Filter</button>
+        </div>
     </form>
 </div>
 

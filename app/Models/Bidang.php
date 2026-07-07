@@ -45,20 +45,4 @@ class Bidang extends Model
     {
         return $this->hasMany(Arsip::class);
     }
-
-    /**
-     * Relasi: Bidang memiliki banyak Surat Masuk.
-     */
-    public function suratMasuk(): HasMany
-    {
-        return $this->hasMany(SuratMasuk::class);
-    }
-
-    /**
-     * Relasi: Bidang memiliki banyak Surat Keluar.
-     */
-    public function suratKeluar(): HasMany
-    {
-        return $this->hasMany(SuratKeluar::class);
-    }
 }

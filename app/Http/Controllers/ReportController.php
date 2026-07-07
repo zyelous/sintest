@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Arsip;
 use App\Models\Bidang;
-use App\Models\SuratKeluar;
-use App\Models\SuratMasuk;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -15,17 +13,11 @@ class ReportController extends Controller
         $user = auth()->user();
 
         $arsipQuery = Arsip::query();
-        $suratMasukQuery = SuratMasuk::query();
-        $suratKeluarQuery = SuratKeluar::query();
 
         if ($user->isOperator()) {
             $arsipQuery->where('bidang_id', $user->bidang_id);
-            $suratMasukQuery->where('bidang_id', $user->bidang_id);
-            $suratKeluarQuery->where('bidang_id', $user->bidang_id);
         } elseif ($request->filled('bidang_id')) {
             $arsipQuery->where('bidang_id', $request->bidang_id);
-            $suratMasukQuery->where('bidang_id', $request->bidang_id);
-            $suratKeluarQuery->where('bidang_id', $request->bidang_id);
         }
 
         if ($request->filled('dari')) {
@@ -41,17 +33,20 @@ class ReportController extends Controller
 
         $bidangList = $user->isAdmin() ? Bidang::orderBy('nama_bidang')->get() : collect([$user->bidang])->filter();
 
-        $rekap = $bidangList->map(function ($b) use ($user) {
-            $masuk = SuratMasuk::where('bidang_id', $b->id)->count();
-            $keluar = SuratKeluar::where('bidang_id', $b->id)->count();
+        $rekap = $bidangList->map(function ($b) {
+            $totalBidang = Arsip::where('bidang_id', $b->id)->count();
+            $aktif = Arsip::where('bidang_id', $b->id)->where('status_retensi', 'aktif')->count();
+            $inaktif = Arsip::where('bidang_id', $b->id)->where('status_retensi', 'inaktif')->count();
+            $dipinjam = Arsip::where('bidang_id', $b->id)->where('status_arsip', 'dipinjam')->count();
             $thisMonth = Arsip::where('bidang_id', $b->id)->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count();
             $lastMonth = Arsip::where('bidang_id', $b->id)->whereYear('created_at', now()->subMonth()->year)->whereMonth('created_at', now()->subMonth()->month)->count();
             $trend = $lastMonth > 0 ? round((($thisMonth - $lastMonth) / $lastMonth) * 100) : ($thisMonth > 0 ? 100 : 0);
             return [
                 'bidang' => $b->nama_bidang,
-                'masuk' => $masuk,
-                'keluar' => $keluar,
-                'total' => $masuk + $keluar,
+                'total' => $totalBidang,
+                'aktif' => $aktif,
+                'inaktif' => $inaktif,
+                'dipinjam' => $dipinjam,
                 'trend' => $trend,
             ];
         });
@@ -114,7 +109,7 @@ class ReportController extends Controller
                     $arsip->jumlah_berkas,
                     $arsip->no_item_arsip,
                     $arsip->uraian_arsip,
-                    $arsip->tanggal_diarsipkan?->format('d/m/Y'),
+                    $arsip->tanggal_diarsipkan ? $arsip->tanggal_diarsipkan->format('d/m/Y') : null,
                     $arsip->jumlah_halaman_bundle,
                     $arsip->tingkat_perkembangan,
                     $arsip->lokasi_simpan,
@@ -125,7 +120,7 @@ class ReportController extends Controller
                     ucfirst($arsip->status_retensi),
                     $arsip->nasib_akhir,
                     $arsip->umur_arsip,
-                    $arsip->bidang?->nama_bidang,
+                    $arsip->bidang ? $arsip->bidang->nama_bidang : null,
                 ]);
             }
 

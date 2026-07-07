@@ -30,13 +30,18 @@
         <p class="text-xs text-slate-400 mb-4">Tentukan Kepala Bidang atau Operator Utama untuk unit ini (dikelola melalui Manajemen User).</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-                <label class="block text-xs font-semibold text-slate-400 mb-1.5">Kepala Bidang (NIP/Nama)</label>
-                <input type="text" disabled placeholder="Cari pegawai..." class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-400">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kepala Bidang (NIP/Nama)</label>
+                <input type="text" name="kepala_bidang" value="{{ old('kepala_bidang') }}" placeholder="Contoh: Drs. Budi Santoso, M.Si / NIP. 19780512..." class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-400 mb-1.5">Operator Utama</label>
                 <input type="text" disabled placeholder="Ditambahkan setelah bidang dibuat" class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-400">
             </div>
+        </div>
+
+        <div class="mt-5">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Catatan / Deskripsi Tugas</label>
+            <textarea name="deskripsi" placeholder="Tuliskan deskripsi singkat mengenai fungsi bidang ini..." class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary" rows="4">{{ old('deskripsi') }}</textarea>
         </div>
 
         <div class="flex items-center justify-end gap-3 mt-8 pt-5 border-t border-slate-100">

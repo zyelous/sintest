@@ -4,7 +4,7 @@
         <button class="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition shrink-0" onclick="toggleSidebar()">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <form action="{{ route('arsip.search') }}" method="GET" class="hidden sm:block w-full max-w-sm">
+        <form action="{{ route('arsip.index') }}" method="GET" class="hidden sm:block w-full max-w-sm">
             <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input type="text" name="search" placeholder="Cari di seluruh arsip..." class="w-full bg-slate-100 border-0 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/30 focus:bg-white transition">

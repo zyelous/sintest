@@ -6,8 +6,6 @@ use App\Http\Controllers\BidangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\SuratKeluarController;
-use App\Http\Controllers\SuratMasukController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArsipImportController;
@@ -33,20 +31,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('bidang', BidangController::class);
     });
 
-    // Surat Masuk
-    Route::post('/surat-masuk/preview', [SuratMasukController::class, 'previewImport'])->name('surat-masuk.preview');
-    Route::post('/surat-masuk/import', [SuratMasukController::class, 'importFromExcel'])->name('surat-masuk.import');
-    Route::resource('surat-masuk', SuratMasukController::class);
-    Route::get('/surat-masuk/{surat_masuk}/download', [SuratMasukController::class, 'download'])->name('surat-masuk.download');
-
-    // Surat Keluar
-    Route::resource('surat-keluar', SuratKeluarController::class);
-    Route::get('/surat-keluar/{surat_keluar}/download', [SuratKeluarController::class, 'download'])->name('surat-keluar.download');
-
     // Arsip
-    Route::get('/arsip/create', fn() => redirect()->route('surat-masuk.create'))->name('arsip.create');
-    Route::get('/arsip/search', [ArsipController::class, 'search'])->name('arsip.search');
-    Route::resource('arsip', ArsipController::class, ['except' => ['create']]);
+    Route::resource('arsip', ArsipController::class);
     Route::get('/arsip/{arsip}/download', [ArsipController::class, 'download'])->name('arsip.download');
 
     // Import Excel Arsip

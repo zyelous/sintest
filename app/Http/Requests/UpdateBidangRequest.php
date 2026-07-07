@@ -23,8 +23,10 @@ class UpdateBidangRequest extends FormRequest
         $bidangId = $this->route('bidang')->id ?? $this->route('bidang');
 
         return [
-            'nama_bidang' => ['required', 'string', 'max:100', Rule::unique('bidang')->ignore($bidangId)],
-            'kode_bidang' => ['required', 'string', 'max:20', Rule::unique('bidang')->ignore($bidangId)],
+            'nama_bidang'   => ['required', 'string', 'max:100', Rule::unique('bidang')->ignore($bidangId)],
+            'kode_bidang'   => ['required', 'string', 'max:20', Rule::unique('bidang')->ignore($bidangId)],
+            'kepala_bidang' => ['nullable', 'string', 'max:150'],
+            'deskripsi'     => ['nullable', 'string'],
         ];
     }
 

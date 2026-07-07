@@ -87,9 +87,10 @@
                 <thead>
                     <tr class="bg-primary text-white text-xs uppercase tracking-wide">
                         <th class="px-5 py-3 text-left font-semibold">Bidang / Unit Kerja</th>
-                        <th class="px-5 py-3 text-left font-semibold">Surat Masuk</th>
-                        <th class="px-5 py-3 text-left font-semibold">Surat Keluar</th>
-                        <th class="px-5 py-3 text-left font-semibold">Total</th>
+                        <th class="px-5 py-3 text-left font-semibold">Total Arsip</th>
+                        <th class="px-5 py-3 text-left font-semibold">Aktif</th>
+                        <th class="px-5 py-3 text-left font-semibold">Inaktif</th>
+                        <th class="px-5 py-3 text-left font-semibold">Dipinjam</th>
                         <th class="px-5 py-3 text-left font-semibold">Trend</th>
                     </tr>
                 </thead>
@@ -97,9 +98,10 @@
                     @forelse($rekap as $r)
                     <tr class="hover:bg-slate-50">
                         <td class="px-5 py-3.5 font-semibold text-slate-800">{{ $r['bidang'] }}</td>
-                        <td class="px-5 py-3.5 text-slate-600">{{ number_format($r['masuk']) }}</td>
-                        <td class="px-5 py-3.5 text-slate-600">{{ number_format($r['keluar']) }}</td>
                         <td class="px-5 py-3.5"><span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">{{ number_format($r['total']) }}</span></td>
+                        <td class="px-5 py-3.5 text-slate-600">{{ number_format($r['aktif']) }}</td>
+                        <td class="px-5 py-3.5 text-slate-600">{{ number_format($r['inaktif']) }}</td>
+                        <td class="px-5 py-3.5 text-slate-600">{{ number_format($r['dipinjam']) }}</td>
                         <td class="px-5 py-3.5">
                             @if($r['trend'] > 0)
                                 <span class="text-emerald-600 text-xs font-semibold">↑ {{ $r['trend'] }}%</span>
@@ -111,7 +113,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Belum ada data.</td></tr>
+                    <tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">Belum ada data.</td></tr>
                     @endforelse
                 </tbody>
             </table>
