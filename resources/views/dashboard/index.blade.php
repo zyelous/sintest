@@ -19,7 +19,7 @@
     {{-- Content --}}
     <div class="relative z-20 p-8 sm:p-10">
         <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
-            Ringkasan Bidang: {{ auth()->user()->bidang->nama_bidang ?? 'Bidang Saya' }}
+            Ringkasan Bidang {{ auth()->user()->bidang->nama_bidang ?? 'Bidang Saya' }}
         </h1>
         <p class="mt-3 text-white/70 text-sm sm:text-base max-w-2xl leading-relaxed">
             Kelola arsip strategis pembangunan {{ strtolower(auth()->user()->bidang->nama_bidang ?? '') }} Provinsi Lampung dengan sistem terintegrasi.
