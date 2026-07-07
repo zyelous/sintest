@@ -3,9 +3,7 @@
     {{-- Logo --}}
     <div class="px-5 py-5 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center shrink-0 ring-1 ring-white/15">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5B942" stroke-width="2"><path d="M12 2 3 6v6c0 5 4 9 9 10 5-1 9-5 9-10V6z"/><path d="M9 12l2 2 4-4" stroke="#F5B942"/></svg>
-            </div>
+            <img src="{{ asset('images/logo_lampung.png') }}" alt="Logo Lampung" class="w-14 h-14 object-contain shrink-0">
             <div>
                 <h2 class="text-lg font-extrabold tracking-wide leading-tight">SINTARA</h2>
                 <p class="text-[0.6rem] text-white/50 uppercase tracking-wider leading-tight">Bappeda Provinsi<br>Lampung</p>
