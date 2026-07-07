@@ -27,9 +27,14 @@ class UpdateUserRequest extends FormRequest
             'name'      => ['required', 'string', 'max:255'],
             'username'  => ['required', 'string', 'max:255', Rule::unique('users')->ignore($userId)],
             'email'     => ['required', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
-            'password'  => ['nullable', 'string', 'min:6', 'confirmed'],
+            'password'  => ['nullable', 'string', 'min:6'],
             'role'      => ['required', 'in:admin,operator'],
-            'bidang_id' => ['required_if:role,operator', 'nullable', 'exists:bidang,id'],
+            'bidang_id' => [
+                'required_if:role,operator',
+                'nullable',
+                'exists:bidang,id',
+                Rule::unique('users')->where(fn($q) => $q->where('role', 'operator'))->ignore($userId)
+            ],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
@@ -51,6 +56,7 @@ class UpdateUserRequest extends FormRequest
             'role.in'               => 'Role tidak valid.',
             'bidang_id.required_if' => 'Bidang wajib dipilih untuk role operator.',
             'bidang_id.exists'      => 'Bidang tidak ditemukan.',
+            'bidang_id.unique'      => 'Bidang ini sudah memiliki akun operator. Setiap bidang hanya boleh memiliki satu akun operator.',
         ];
     }
 }

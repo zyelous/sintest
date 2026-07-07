@@ -30,10 +30,10 @@ class UserController extends Controller
             $query->where('bidang_id', $request->bidang_id);
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        $userList = $query->latest()->paginate(10)->withQueryString();
         $bidangList = Bidang::orderBy('nama_bidang')->get();
 
-        return view('users.index', compact('users', 'bidangList'));
+        return view('users.index', compact('userList', 'bidangList'));
     }
 
     public function create()

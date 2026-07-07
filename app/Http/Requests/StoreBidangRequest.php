@@ -19,8 +19,10 @@ class StoreBidangRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama_bidang' => ['required', 'string', 'max:100', 'unique:bidang'],
-            'kode_bidang' => ['required', 'string', 'max:20', 'unique:bidang'],
+            'nama_bidang'   => ['required', 'string', 'max:100', 'unique:bidang'],
+            'kode_bidang'   => ['required', 'string', 'max:20', 'unique:bidang'],
+            'kepala_bidang' => ['nullable', 'string', 'max:150'],
+            'deskripsi'     => ['nullable', 'string'],
         ];
     }
 

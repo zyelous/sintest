@@ -1,133 +1,100 @@
 @extends('layouts.guest')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-12 relative overflow-hidden bg-slate-950">
-    {{-- Blurred Background Photo --}}
-    <div class="absolute inset-0 w-full h-full z-0 select-none pointer-events-none">
-        <img src="{{ asset('images/login_bg.png') }}" class="w-full h-full object-cover blur-md scale-105 opacity-90" alt="Blurred Background">
-        <div class="absolute inset-0 bg-black/15"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent"></div>
-    </div>
+<style>
+    * { box-sizing: border-box }
+    .login-page { display:flex; width:100%; min-height:100dvh; overflow:hidden; background:#fff; color:#1e293b }
+    .login-hero { position:relative; flex:0 0 60%; min-height:100dvh; overflow:hidden }
+    .login-hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+    .login-hero::after { content:""; position:absolute; inset:0; background:linear-gradient(to top,rgba(1,38,69,.88),rgba(9,50,78,.42),rgba(25,65,91,.3)),rgba(1,38,69,.48) }
+    .brand { position:relative; z-index:1; padding:clamp(42px,5vw,76px) clamp(42px,5.5vw,88px); color:#fff }
+    .brand p { margin:0; font-size:clamp(24px,1.8vw,32px); font-weight:600 }
+    .brand h1 { max-width:760px; margin:26px 0 0; font-size:clamp(30px,2.4vw,44px); line-height:1.18; text-transform:uppercase }
+    .login-panel { display:flex; flex:0 0 40%; min-height:100dvh; align-items:center; justify-content:center; padding:40px clamp(32px,4vw,72px); overflow-y:auto }
+    .login-box { width:100%; max-width:420px; margin:auto }
+    .mobile-brand { display:none }
+    .login-box h2 { margin:0; font-size:30px }
+    .intro { margin:9px 0 0; color:#4b5563; line-height:1.55 }
+    form { display:grid; gap:22px; margin-top:38px }
+    .label { display:block; margin-bottom:8px; color:#475569; font-size:12px; font-weight:700; text-transform:uppercase }
+    .control { position:relative }
+    .control > svg { position:absolute; top:50%; left:15px; width:20px; color:#64748b; transform:translateY(-50%); pointer-events:none }
+    .input { width:100%; height:49px; padding:0 46px 0 48px; border:1px solid #cbd5e1; border-radius:4px; outline:0; font:inherit }
+    .input::placeholder { color:#94a3b8 }
+    .input:focus { border-color:#0b4775; box-shadow:0 0 0 3px rgba(11,71,117,.12) }
+    .input.error { border-color:#ef4444 }
+    .error-text { margin:6px 0 0; color:#ef4444; font-size:12px }
+    .eye { position:absolute; top:0; right:0; display:grid; width:48px; height:49px; place-items:center; border:0; background:transparent; color:#64748b; cursor:pointer }
+    .eye svg { width:20px }
+    .hidden { display:none }
+    .remember { display:flex; width:max-content; align-items:center; gap:10px; color:#4b5563; font-size:14px; cursor:pointer }
+    .remember input { width:20px; height:20px; margin:0; accent-color:#073b63 }
+    .submit { display:flex; width:100%; height:56px; align-items:center; justify-content:center; gap:9px; border:0; border-radius:4px; background:#073b63; color:#fff; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; box-shadow:0 8px 18px rgba(7,59,99,.2) }
+    .submit:hover { background:#052d4b }
+    .submit svg { width:20px }
 
-    {{-- Main Centered Card Container --}}
-    <div class="w-full max-w-[960px] bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden relative z-10 animate-fade-in-up">
-        
-        {{-- Left Column: Image Banner (Visible on Desktop) --}}
-        <div class="hidden md:block md:w-[45%] relative min-h-[520px]">
-            {{-- Background Image --}}
-            <img src="{{ asset('images/login_bg.png') }}" class="absolute inset-0 w-full h-full object-cover" alt="SINTARA Background">
-            
-            {{-- Dark Blue-Teal Gradient Overlay --}}
-            <div class="absolute inset-0 bg-gradient-to-tr from-[#0A1930]/95 via-[#1B3A5C]/85 to-[#3B82F6]/30 z-10 mix-blend-multiply"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0A1930]/90 via-[#1B3A5C]/50 to-transparent z-10"></div>
-            
-            {{-- Branding Text Overlay --}}
-            <div class="absolute inset-0 p-10 flex flex-col justify-start z-20">
-                <span class="text-white text-xs font-bold tracking-widest uppercase">SINTARA</span>
-                <h1 class="text-white text-xl lg:text-2xl font-extrabold tracking-wide uppercase leading-snug mt-4">
-                    Sistem Informasi Monitoring<br>dan Tracking Arsip
-                </h1>
-            </div>
+    @media (max-width:1023px) {
+        .login-hero { display:none }
+        .login-panel { flex-basis:100%; padding:32px 24px }
+        .mobile-brand { display:block; margin-bottom:38px; color:#073b63; font-size:20px; font-weight:700 }
+    }
+</style>
+
+<div class="login-page">
+    <section class="login-hero">
+        <img src="{{ asset('images/login_bg.png') }}" alt="Latar SINTARA">
+        <div class="brand">
+            <p>SINTARA</p>
+            <h1>Sistem Informasi Monitoring<br>dan Tracking Arsip</h1>
         </div>
+    </section>
 
-        {{-- Right Column: Login Form --}}
-        <div class="w-full md:w-[55%] flex flex-col justify-center p-8 sm:p-12 bg-white">
-            <div class="max-w-[360px] w-full mx-auto">
-                
-                {{-- Lampung Logo --}}
-                <div class="mb-6">
-                    <img src="{{ asset('images/logo_lampung.png') }}" class="h-16 w-auto drop-shadow-sm" alt="Logo Provinsi Lampung">
+    <main class="login-panel">
+        <div class="login-box">
+            <div class="mobile-brand">SINTARA</div>
+            <h2>Selamat Datang</h2>
+            <p class="intro">Silakan masuk dengan akun resmi Anda untuk melanjutkan ke dashboard sistem.</p>
+
+            <form method="POST" action="{{ route('login.submit') }}">
+                @csrf
+
+                <div>
+                    <label class="label" for="username">Username</label>
+                    <div class="control">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <input class="input {{ $errors->has('username') ? 'error' : '' }}" type="text" id="username" name="username" value="{{ old('username') }}" placeholder="username" autocomplete="username" required autofocus>
+                    </div>
+                    @error('username') <p class="error-text">{{ $message }}</p> @enderror
                 </div>
 
-                <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Selamat Datang</h2>
-                <p class="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                    Silakan masuk dengan akun resmi Anda untuk melanjutkan ke dashboard sistem.
-                </p>
-
-                <form method="POST" action="{{ route('login.submit') }}" class="space-y-5 mt-6">
-                    @csrf
-
-                    {{-- Username Field --}}
-                    <div>
-                        <label for="username" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Username</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </span>
-                            <input type="text" id="username" name="username" value="{{ old('username') }}" placeholder="username" autofocus required
-                                class="w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 placeholder:text-slate-400 {{ $errors->has('username') ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200' }}">
-                        </div>
-                        @error('username')
-                            <p class="mt-1.5 text-xs font-medium text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Password Field --}}
-                    <div>
-                        <label for="password" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kata Sandi</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </span>
-                            <input type="password" id="password" name="password" placeholder="••••••••" required
-                                class="w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 placeholder:text-slate-400">
-                            <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition p-1">
-                                {{-- Eye Open Icon --}}
-                                <svg id="eyeOpen" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                {{-- Eye Closed Icon --}}
-                                <svg id="eyeClosed" width="18" height="18" class="hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                                </svg>
-                            </button>
-                        </div>
-                        @error('password')
-                            <p class="mt-1.5 text-xs font-medium text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Remember Checkbox --}}
-                    <div class="flex items-center">
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/20 accent-primary">
-                            <span class="text-sm text-slate-500 ml-2.5 select-none group-hover:text-slate-700 transition-colors">Ingat Saya</span>
-                        </label>
-                    </div>
-
-                    {{-- Submit Button --}}
-                    <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#0B2545] hover:bg-[#06182c] text-white font-semibold rounded-lg shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 text-sm">
-                        <span>Masuk Ke Sistem</span>
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <div>
+                    <label class="label" for="password">Kata Sandi</label>
+                    <div class="control">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                        <input class="input {{ $errors->has('password') ? 'error' : '' }}" type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+                        <button class="eye" type="button" id="togglePassword" aria-label="Tampilkan kata sandi">
+                            <svg id="eyeOpen" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <svg id="eyeClosed" class="hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A10.6 10.6 0 0112 5c4.5 0 8.3 2.9 9.5 7a10.4 10.4 0 01-2.1 3.8M6.6 6.6A10.2 10.2 0 002.5 12c1.2 4.1 5 7 9.5 7 1.1 0 2.2-.2 3.1-.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                    @error('password') <p class="error-text">{{ $message }}</p> @enderror
+                </div>
 
-<script>
-function togglePassword() {
-    const input = document.getElementById('password');
-    const eyeOpen = document.getElementById('eyeOpen');
-    const eyeClosed = document.getElementById('eyeClosed');
-    
-    if (input.type === 'password') {
-        input.type = 'text';
-        eyeOpen.classList.add('hidden');
-        eyeClosed.classList.remove('hidden');
-    } else {
-        input.type = 'password';
-        eyeOpen.classList.remove('hidden');
-        eyeClosed.classList.add('hidden');
-    }
-}
-</script>
-@endsection
+                <label class="remember">
+                    <input type="checkbox" name="remember">
+                    <span>Ingat Saya</span>
+                </label>
+
+                <button class="submit" type="submit">
+                    Masuk Ke Sistem
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l4-4-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
