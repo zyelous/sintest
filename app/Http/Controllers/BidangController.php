@@ -11,7 +11,7 @@ class BidangController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Bidang::withCount(['users', 'arsip']);
+        $query = Bidang::with(['users'])->withCount(['users', 'arsip']);
 
         if ($request->filled('search')) {
             $s = $request->search;

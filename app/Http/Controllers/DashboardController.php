@@ -25,6 +25,7 @@ class DashboardController extends Controller
             $totalBoks = Arsip::whereNotNull('no_boks')->where('no_boks', '!=', '')->distinct('no_boks')->count('no_boks');
             $recentPeminjaman = PeminjamanArsip::with(['arsip.bidang'])
                 ->where('status', 'dipinjam')->latest()->take(5)->get();
+            $recentArsip = Arsip::with('bidang')->latest()->take(5)->get();
             $recentSuratMasuk = SuratMasuk::with('bidang')->latest()->take(5)->get();
 
             $monthlyGrowth = [];
@@ -57,13 +58,14 @@ class DashboardController extends Controller
             $recentPeminjaman = PeminjamanArsip::with(['arsip'])
                 ->whereHas('arsip', fn($q) => $q->where('bidang_id', $bidangId))
                 ->where('status', 'dipinjam')->latest()->take(5)->get();
+            $recentArsip = Arsip::where('bidang_id', $bidangId)->latest()->take(5)->get();
             $recentSuratMasuk = SuratMasuk::where('bidang_id', $bidangId)->latest()->take(5)->get();
         }
 
         return view('dashboard.index', compact(
             'totalArsip', 'arsipAktif', 'arsipDipinjam',
             'totalSuratMasuk', 'totalSuratKeluar', 'totalPeminjaman',
-            'arsipPerBidang', 'recentPeminjaman', 'recentSuratMasuk',
+            'arsipPerBidang', 'recentPeminjaman', 'recentSuratMasuk', 'recentArsip',
             'totalBoks', 'monthlyGrowth'
         ));
     }

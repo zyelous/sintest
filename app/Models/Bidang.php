@@ -28,7 +28,17 @@ class Bidang extends Model
     protected $fillable = [
         'nama_bidang',
         'kode_bidang',
+        'kepala_bidang',
+        'deskripsi',
     ];
+
+    /**
+     * Relasi: Mendapatkan operator tunggal yang dikaitkan dengan bidang ini.
+     */
+    public function getOperatorAttribute()
+    {
+        return $this->users()->where('role', 'operator')->first();
+    }
 
     /**
      * Relasi: Bidang memiliki banyak User (operator).

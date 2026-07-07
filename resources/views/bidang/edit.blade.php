@@ -24,6 +24,24 @@
                 @error('nama_bidang')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
 
+            <h3 class="text-sm font-bold text-primary mt-6 mb-1">Penanggung Jawab</h3>
+            <p class="text-xs text-slate-400 mb-4 font-medium">Tentukan Kepala Bidang dan tinjau akun operator untuk unit kerja ini.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kepala Bidang (NIP/Nama)</label>
+                    <input type="text" name="kepala_bidang" value="{{ old('kepala_bidang', $bidang->kepala_bidang) }}" placeholder="Contoh: Drs. Budi Santoso, M.Si / NIP. 19780512..." class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Akun Operator Bidang</label>
+                    <input type="text" disabled value="{{ $bidang->operator ? $bidang->operator->name . ' (' . $bidang->operator->username . ')' : 'Belum dibuat (Gunakan Menu Manajemen User)' }}" class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-500 font-medium">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Catatan / Deskripsi Tugas</label>
+                <textarea name="deskripsi" placeholder="Tuliskan deskripsi singkat mengenai fungsi bidang ini..." class="w-full rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary" rows="4">{{ old('deskripsi', $bidang->deskripsi) }}</textarea>
+            </div>
+
             <div class="flex items-center gap-3 pt-5 border-t border-slate-100">
                 <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition shadow-sm">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>

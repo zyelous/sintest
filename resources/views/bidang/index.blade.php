@@ -40,15 +40,22 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="1"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
         </div>
         <h3 class="font-bold text-slate-800 text-lg">{{ $b->nama_bidang }}</h3>
-        <p class="text-xs text-slate-400 mb-4"># KODE: {{ $b->kode_bidang }}</p>
+        <p class="text-xs text-slate-400 mb-2"># KODE: {{ $b->kode_bidang }}</p>
+        <p class="text-xs text-slate-600 mb-4"><strong>Kepala Bidang:</strong> {{ $b->kepala_bidang ?? 'Belum ditentukan' }}</p>
         <div class="flex items-center justify-between pt-4 border-t border-slate-100 mb-4">
             <div>
-                <p class="text-[0.65rem] font-semibold text-slate-400 uppercase">Operator Utama</p>
-                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ $b->users_count }} Personel</p>
+                <p class="text-[0.65rem] font-semibold text-slate-400 uppercase">Akun Operator</p>
+                <p class="text-xs font-semibold text-slate-700 mt-0.5">
+                    @if($b->operator)
+                        <span class="text-blue-600">{{ $b->operator->name }}</span> <span class="text-slate-400">({{ $b->operator->username }})</span>
+                    @else
+                        <span class="text-red-500">Belum dibuat</span>
+                    @endif
+                </p>
             </div>
             <div class="text-right">
                 <p class="text-[0.65rem] font-semibold text-slate-400 uppercase">Total Arsip</p>
-                <p class="text-sm font-semibold text-slate-700 mt-0.5">{{ number_format($b->arsip_count) }} Dokumen</p>
+                <p class="text-xs font-semibold text-slate-700 mt-0.5">{{ number_format($b->arsip_count) }} Dokumen</p>
             </div>
         </div>
         <div class="flex items-center gap-2">

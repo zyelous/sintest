@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use Illuminate\Validation\Rule;
+
 /**
  * Form Request: Store User
  * 
@@ -23,9 +25,14 @@ class StoreUserRequest extends FormRequest
             'name'      => ['required', 'string', 'max:255'],
             'username'  => ['required', 'string', 'max:255', 'unique:users'],
             'email'     => ['required', 'email', 'max:255', 'unique:users'],
-            'password'  => ['required', 'string', 'min:6', 'confirmed'],
+            'password'  => ['required', 'string', 'min:6'],
             'role'      => ['required', 'in:admin,operator'],
-            'bidang_id' => ['required_if:role,operator', 'nullable', 'exists:bidang,id'],
+            'bidang_id' => [
+                'required_if:role,operator',
+                'nullable',
+                'exists:bidang,id',
+                Rule::unique('users')->where(fn($q) => $q->where('role', 'operator'))
+            ],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
@@ -48,6 +55,7 @@ class StoreUserRequest extends FormRequest
             'role.in'               => 'Role tidak valid.',
             'bidang_id.required_if' => 'Bidang wajib dipilih untuk role operator.',
             'bidang_id.exists'      => 'Bidang tidak ditemukan.',
+            'bidang_id.unique'      => 'Bidang ini sudah memiliki akun operator. Setiap bidang hanya boleh memiliki satu akun operator.',
         ];
     }
 }
