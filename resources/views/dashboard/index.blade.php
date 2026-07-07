@@ -1,16 +1,14 @@
 @extends('layouts.app')
 @section('title', 'Beranda')
 @section('content')
-
+ 
 @if(auth()->user()->isOperator())
 {{-- ═══════════════════════════════════════════════════════════ --}}
 {{-- OPERATOR DASHBOARD --}}
 {{-- ═══════════════════════════════════════════════════════════ --}}
-
+ 
 {{-- Hero Banner --}}
-<div class="relative overflow-hidden rounded-2xl mb-6 shadow-lg" style="min-height: 220px;">
-    {{-- Background gradient overlay --}}
-    <div class="absolute inset-0 bg-gradient-to-r from-primary-dark/95 via-primary/90 to-primary/70 z-10"></div>
+<div class="relative overflow-hidden rounded-2xl mb-6 shadow-lg bg-primary-dark">
     {{-- Decorative pattern --}}
     <div class="absolute inset-0 z-[5]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Ccircle cx=\'30\' cy=\'30\' r=\'2\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
     {{-- Right decorative circles --}}
@@ -24,43 +22,25 @@
         <p class="mt-3 text-white/70 text-sm sm:text-base max-w-2xl leading-relaxed">
             Kelola arsip strategis pembangunan {{ strtolower(auth()->user()->bidang->nama_bidang ?? '') }} Provinsi Lampung dengan sistem terintegrasi.
         </p>
-    </div>
-</div>
-
-{{-- Stat Cards --}}
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    {{-- Total Arsip --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow duration-200">
-        <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <div>
-            <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wider">Total Arsip</p>
-            <p class="text-3xl font-extrabold text-slate-900 mt-1">{{ number_format($totalArsip) }}</p>
-        </div>
-    </div>
-    {{-- Arsip Aktif --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow duration-200">
-        <div class="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        </div>
-        <div>
-            <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wider">Arsip Aktif</p>
-            <p class="text-3xl font-extrabold text-slate-900 mt-1">{{ number_format($arsipAktif) }}</p>
-        </div>
-    </div>
-    {{-- Sedang Dipinjam --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow duration-200">
-        <div class="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        </div>
-        <div>
-            <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wider">Sedang Dipinjam</p>
-            <p class="text-3xl font-extrabold text-slate-900 mt-1">{{ number_format($arsipDipinjam) }}</p>
+ 
+        {{-- Stat Cards --}}
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="rounded-2xl bg-black/20 border border-white/10 p-5">
+                <p class="text-[0.7rem] font-semibold text-white/50 uppercase tracking-wider">Total Arsip</p>
+                <p class="text-3xl font-extrabold text-white mt-1">{{ number_format($totalArsip) }}</p>
+            </div>
+            <div class="rounded-2xl bg-black/20 border border-white/10 p-5">
+                <p class="text-[0.7rem] font-semibold text-white/50 uppercase tracking-wider">Arsip Aktif</p>
+                <p class="text-3xl font-extrabold text-white mt-1">{{ number_format($arsipAktif) }}</p>
+            </div>
+            <div class="rounded-2xl bg-black/20 border border-white/10 p-5">
+                <p class="text-[0.7rem] font-semibold text-white/50 uppercase tracking-wider">Sedang Dipinjam</p>
+                <p class="text-3xl font-extrabold text-white mt-1">{{ number_format($arsipDipinjam) }}</p>
+            </div>
         </div>
     </div>
 </div>
-
+ 
 {{-- Two Column Layout: Table + Activity --}}
 <div class="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
     {{-- Left: Arsip Terbaru Table --}}
@@ -125,18 +105,18 @@
             </div>
         </div>
     </div>
-
+ 
     {{-- Right: Aktivitas Terakhir --}}
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <div class="flex items-center gap-2 mb-5">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <h3 class="text-base font-bold text-slate-900">Aktivitas Terakhir</h3>
         </div>
-
+ 
         <div class="relative">
             {{-- Timeline line --}}
             <div class="absolute left-[18px] top-2 bottom-2 w-0.5 bg-slate-200"></div>
-
+ 
             <div class="space-y-5">
                 @forelse($recentArsip->take(2) as $idx => $arsip)
                 <div class="relative flex gap-3.5 pl-0">
@@ -154,7 +134,7 @@
                 </div>
                 @empty
                 @endforelse
-
+ 
                 @forelse($recentSuratMasuk->take(2) as $idx => $surat)
                 <div class="relative flex gap-3.5 pl-0">
                     <div class="w-9 h-9 rounded-full shrink-0 flex items-center justify-center z-10 {{ $idx === 0 ? 'bg-sky-100 text-sky-600' : 'bg-violet-100 text-violet-600' }}">
@@ -171,7 +151,7 @@
                 </div>
                 @empty
                 @endforelse
-
+ 
                 @if($recentArsip->isEmpty() && $recentSuratMasuk->isEmpty())
                 <div class="text-center py-6">
                     <p class="text-sm text-slate-400">Belum ada aktivitas terbaru.</p>
@@ -179,7 +159,7 @@
                 @endif
             </div>
         </div>
-
+ 
         <a href="{{ route('arsip.index') }}" class="mt-6 flex items-center justify-center w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition">
             Lihat Semua Aktivitas
         </a>
