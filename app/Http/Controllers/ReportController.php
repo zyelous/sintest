@@ -68,66 +68,138 @@ class ReportController extends Controller
         $arsipList = $query->orderBy('kode_klasifikasi')->get();
         $bidang = $request->filled('bidang_id') ? Bidang::find($request->bidang_id) : null;
         $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang->nama_bidang : 'SEMUA BIDANG');
+        $showBidangColumn = !$bidang && !$user->isOperator();
 
-        // Generate CSV as simple Excel-compatible export
-        $filename = 'daftar_arsip_aktif_' . strtolower(str_replace(' ', '_', $bidangNama)) . '_' . date('Ymd') . '.csv';
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Daftar Arsip Aktif');
 
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        $lastCol = $showBidangColumn ? 'U' : 'T';
+
+        // Judul
+        $sheet->setCellValue('A1', 'DAFTAR ARSIP AKTIF ' . strtoupper($bidangNama));
+        $sheet->mergeCells("A1:{$lastCol}1");
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Info pencipta/unit
+        $sheet->setCellValue('A2', 'Pencipta Arsip');
+        $sheet->setCellValue('B2', ': Bappeda Provinsi Lampung');
+        $sheet->setCellValue('A3', 'Unit Pengolah');
+        $sheet->setCellValue('B3', ': ' . $bidangNama);
+        $sheet->setCellValue('A4', 'Unit Kearsipan');
+        $sheet->setCellValue('B4', ': Sekretariat');
+        $sheet->getStyle('A2:A4')->getFont()->setBold(true);
+
+        // Header tabel (baris 6-7, merge cell)
+        $headerRow1 = 6;
+        $headerRow2 = 7;
+
+        $singleCols = [
+            'A' => 'Kode Klasifikasi',
+            'B' => 'No. Berkas',
+            'C' => 'Uraian Informasi Berkas',
+            'D' => 'Kurun Waktu',
+            'E' => 'Jumlah Berkas',
+            'F' => 'No. Item Arsip',
+            'G' => 'Uraian Informasi Arsip',
+            'H' => 'Tanggal Diarsipkan',
+            'I' => 'Jumlah Halaman/ Map/ Bundle',
+            'J' => 'Tingkat Perkembangan',
         ];
+        foreach ($singleCols as $col => $label) {
+            $sheet->setCellValue("{$col}{$headerRow1}", $label);
+            $sheet->mergeCells("{$col}{$headerRow1}:{$col}{$headerRow2}");
+        }
 
-        $callback = function () use ($arsipList, $bidangNama) {
-            $file = fopen('php://output', 'w');
-            // BOM for Excel UTF-8
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        $sheet->setCellValue("K{$headerRow1}", 'Keterangan Lokasi Simpan');
+        $sheet->mergeCells("K{$headerRow1}:M{$headerRow1}");
+        $sheet->setCellValue("K{$headerRow2}", 'No. Rak');
+        $sheet->setCellValue("L{$headerRow2}", 'No. Boks');
+        $sheet->setCellValue("M{$headerRow2}", 'No. Folder');
 
-            // Header info
-            fputcsv($file, ['DAFTAR ARSIP AKTIF SEKRETARIAT']);
-            fputcsv($file, ['Pencipta Arsip: Bappeda Provinsi Lampung']);
-            fputcsv($file, ['Unit Pengolah: ' . $bidangNama]);
-            fputcsv($file, ['Tanggal Export: ' . date('d/m/Y')]);
-            fputcsv($file, []);
+        $sheet->setCellValue("N{$headerRow1}", 'Kategori/Klasifikasi Keamanan');
+        $sheet->mergeCells("N{$headerRow1}:Q{$headerRow1}");
+        $sheet->setCellValue("N{$headerRow2}", 'Biasa');
+        $sheet->setCellValue("O{$headerRow2}", 'Terbatas');
+        $sheet->setCellValue("P{$headerRow2}", 'Rahasia');
+        $sheet->setCellValue("Q{$headerRow2}", 'Sangat Rahasia');
 
-            // Column headers
-            fputcsv($file, [
-                'No', 'Kode Klasifikasi', 'No. Berkas', 'Uraian Berkas',
-                'Kurun Waktu', 'Jumlah Berkas', 'No. Item Arsip', 'Uraian Arsip',
-                'Tgl Diarsipkan', 'Jml Halaman/Bundle', 'Tingkat Perkembangan',
-                'Lokasi Simpan', 'No. Rak', 'No. Boks', 'No. Folder',
-                'Klasifikasi Keamanan', 'Status Retensi', 'Nasib Akhir',
-                'Umur Arsip', 'Bidang'
-            ]);
+        $sheet->setCellValue("R{$headerRow1}", 'Retensi');
+        $sheet->mergeCells("R{$headerRow1}:T{$headerRow1}");
+        $sheet->setCellValue("R{$headerRow2}", 'Aktif');
+        $sheet->setCellValue("S{$headerRow2}", 'Inaktif');
+        $sheet->setCellValue("T{$headerRow2}", 'Nasib Akhir');
 
-            foreach ($arsipList as $i => $arsip) {
-                fputcsv($file, [
-                    $i + 1,
-                    $arsip->kode_klasifikasi,
-                    $arsip->no_berkas,
-                    $arsip->uraian_berkas,
-                    $arsip->kurun_waktu,
-                    $arsip->jumlah_berkas,
-                    $arsip->no_item_arsip,
-                    $arsip->uraian_arsip,
-                    $arsip->tanggal_diarsipkan ? $arsip->tanggal_diarsipkan->format('d/m/Y') : null,
-                    $arsip->jumlah_halaman_bundle,
-                    $arsip->tingkat_perkembangan,
-                    $arsip->lokasi_simpan,
-                    $arsip->no_rak,
-                    $arsip->no_boks,
-                    $arsip->no_folder,
-                    strtoupper(str_replace('_', ' ', $arsip->klasifikasi_keamanan)),
-                    ucfirst($arsip->status_retensi),
-                    $arsip->nasib_akhir,
-                    $arsip->umur_arsip,
-                    $arsip->bidang ? $arsip->bidang->nama_bidang : null,
-                ]);
+        if ($showBidangColumn) {
+            $sheet->setCellValue("U{$headerRow1}", 'Bidang');
+            $sheet->mergeCells("U{$headerRow1}:U{$headerRow2}");
+        }
+
+        $headerRange = "A{$headerRow1}:{$lastCol}{$headerRow2}";
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+            ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('D9E2F3');
+        $sheet->getStyle($headerRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Data
+        $row = $headerRow2 + 1;
+        foreach ($arsipList as $arsip) {
+            $sheet->setCellValue("A{$row}", $arsip->kode_klasifikasi);
+            $sheet->setCellValue("B{$row}", $arsip->no_berkas);
+            $sheet->setCellValue("C{$row}", $arsip->uraian_berkas);
+            $sheet->setCellValue("D{$row}", $arsip->kurun_waktu);
+            $sheet->setCellValue("E{$row}", $arsip->jumlah_berkas);
+            $sheet->setCellValue("F{$row}", $arsip->no_item_arsip);
+            $sheet->setCellValue("G{$row}", $arsip->uraian_arsip);
+            $sheet->setCellValue("H{$row}", $arsip->tanggal_diarsipkan?->format('d F Y'));
+            $sheet->setCellValue("I{$row}", $arsip->jumlah_halaman_bundle);
+            $sheet->setCellValue("J{$row}", $arsip->tingkat_perkembangan);
+            $sheet->setCellValue("K{$row}", $arsip->no_rak);
+            $sheet->setCellValue("L{$row}", $arsip->no_boks);
+            $sheet->setCellValue("M{$row}", $arsip->no_folder);
+            $sheet->setCellValue("N{$row}", $arsip->klasifikasi_keamanan === 'biasa');
+            $sheet->setCellValue("O{$row}", $arsip->klasifikasi_keamanan === 'terbatas');
+            $sheet->setCellValue("P{$row}", $arsip->klasifikasi_keamanan === 'rahasia');
+            $sheet->setCellValue("Q{$row}", $arsip->klasifikasi_keamanan === 'sangat_rahasia');
+            $sheet->setCellValue("R{$row}", $arsip->status_retensi === 'aktif' && empty($arsip->nasib_akhir));
+            $sheet->setCellValue("S{$row}", $arsip->status_retensi === 'inaktif' && empty($arsip->nasib_akhir));
+            $sheet->setCellValue("T{$row}", !empty($arsip->nasib_akhir));
+            if ($showBidangColumn) {
+                $sheet->setCellValue("U{$row}", $arsip->bidang?->nama_bidang);
             }
+            $row++;
+        }
 
-            fclose($file);
-        };
+        $lastDataRow = $row - 1;
+        if ($lastDataRow >= $headerRow2 + 1) {
+            $dataRange = "A" . ($headerRow2 + 1) . ":{$lastCol}{$lastDataRow}";
+            $sheet->getStyle($dataRange)->getBorders()->getAllBorders()
+                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle("A" . ($headerRow2 + 1) . ":C{$lastDataRow}")->getAlignment()->setWrapText(true);
+            $sheet->getStyle("G" . ($headerRow2 + 1) . ":G{$lastDataRow}")->getAlignment()->setWrapText(true);
+            $sheet->getStyle("N" . ($headerRow2 + 1) . ":T{$lastDataRow}")->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        }
 
-        return response()->stream($callback, 200, $headers);
+        // Lebar kolom
+        $widths = ['A' => 14, 'B' => 20, 'C' => 40, 'D' => 12, 'E' => 10, 'F' => 14, 'G' => 30, 'H' => 16, 'I' => 12, 'J' => 16, 'K' => 8, 'L' => 8, 'M' => 8, 'N' => 8, 'O' => 9, 'P' => 9, 'Q' => 10, 'R' => 8, 'S' => 8, 'T' => 10, 'U' => 18];
+        foreach ($widths as $col => $w) {
+            $sheet->getColumnDimension($col)->setWidth($w);
+        }
+        $sheet->freezePane("A" . ($headerRow2 + 1));
+
+        $filename = 'daftar_arsip_aktif_' . strtolower(str_replace(' ', '_', $bidangNama)) . '_' . date('Ymd') . '.xlsx';
+        $tempPath = storage_path('app/temp_' . uniqid() . '.xlsx');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($tempPath);
+
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
     }
 
     public function exportPdf(Request $request)
