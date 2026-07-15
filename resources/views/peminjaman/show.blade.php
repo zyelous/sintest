@@ -134,14 +134,14 @@
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </div>
                 <h4 class="text-lg font-bold text-red-600">Peminjaman Terlambat</h4>
-                <p class="text-sm font-semibold text-slate-800 mt-1">Terlambat: {{ $days }} Hari</p>
+                <p class="text-sm font-semibold text-slate-800 mt-1">Durasi Peminjaman: {{ $peminjaman->durasi_pinjam }}</p>
                 <p class="text-xs text-slate-400 mt-2">Batas waktu peminjaman 14 hari terlampaui. Segera hubungi peminjam.</p>
             @else
                 <div class="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-100 shadow-inner">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </div>
                 <h4 class="text-lg font-bold text-amber-600">Sedang Dipinjam</h4>
-                <p class="text-sm font-semibold text-slate-800 mt-1">Durasi Peminjaman: {{ $days }} Hari</p>
+                <p class="text-sm font-semibold text-slate-800 mt-1">Durasi Peminjaman: {{ $peminjaman->durasi_pinjam }}</p>
                 <p class="text-xs text-slate-400 mt-2">Arsip dalam kondisi dipinjam dan batas waktu pengembalian adalah 14 hari.</p>
             @endif
 

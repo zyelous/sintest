@@ -38,6 +38,41 @@ class PeminjamanArsip extends Model
     }
 
     /**
+     * Accessor: Durasi peminjaman dalam format human-readable (minggu, hari, jam, menit).
+     */
+    public function getDurasiPinjamAttribute(): string
+    {
+        $end = $this->tanggal_kembali ?? now();
+        $diff = $this->tanggal_pinjam->diff($end);
+
+        $totalDays = $diff->days;
+        $weeks = floor($totalDays / 7);
+        $days = $totalDays % 7;
+        $hours = $diff->h;
+        $minutes = $diff->i;
+
+        $parts = [];
+        if ($weeks > 0) {
+            $parts[] = $weeks . ' minggu';
+        }
+        if ($days > 0) {
+            $parts[] = $days . ' hari';
+        }
+        if ($hours > 0) {
+            $parts[] = $hours . ' jam';
+        }
+        if ($weeks == 0 && $days == 0 && $minutes > 0) {
+            $parts[] = $minutes . ' menit';
+        }
+
+        if (empty($parts)) {
+            return 'kurang dari 1 menit';
+        }
+
+        return implode(', ', $parts);
+    }
+
+    /**
      * Relasi: Peminjaman milik satu Arsip.
      */
     public function arsip(): BelongsTo

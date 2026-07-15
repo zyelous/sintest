@@ -144,9 +144,9 @@
                         @if($p->status === 'dikembalikan')
                             <span class="px-2.5 py-1 rounded-full text-[0.7rem] font-semibold bg-emerald-100 text-emerald-700">Dikembalikan</span>
                         @elseif($p->tanggal_pinjam->diffInDays(now()) > 14)
-                            <span class="px-2.5 py-1 rounded-full text-[0.7rem] font-semibold bg-red-100 text-red-700">Terlambat ({{ $p->tanggal_pinjam->diffInDays(now()) }} hari)</span>
+                            <span class="px-2.5 py-1 rounded-full text-[0.7rem] font-semibold bg-red-100 text-red-700">Terlambat ({{ $p->durasi_pinjam }})</span>
                         @else
-                            <span class="px-2.5 py-1 rounded-full text-[0.7rem] font-semibold bg-amber-100 text-amber-700">Dipinjam ({{ $p->tanggal_pinjam->diffInDays(now()) }} hari)</span>
+                            <span class="px-2.5 py-1 rounded-full text-[0.7rem] font-semibold bg-amber-100 text-amber-700">Dipinjam ({{ $p->durasi_pinjam }})</span>
                         @endif
                     </td>
                     <td class="px-5 py-3.5 whitespace-nowrap">
