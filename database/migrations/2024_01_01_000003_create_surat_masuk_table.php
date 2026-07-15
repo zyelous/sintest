@@ -1,40 +1,25 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Migration: Tabel Surat Masuk
- * 
- * Menyimpan data surat masuk yang diterima oleh Bappeda.
+ * Modul Surat Masuk/Surat Keluar dikeluarkan dari scope Modul Pengelolaan Arsip
+ * (tidak ada di ERD & Use Case final). Migration ini drop tabelnya, tapi file
+ * migration lama (create_surat_masuk_table, create_surat_keluar_table) TIDAK
+ * dihapus agar riwayat migration tetap konsisten.
  */
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('surat_masuk', function (Blueprint $table) {
-            $table->id();
-            $table->string('nomor_surat');
-            $table->date('tanggal_surat');
-            $table->date('tanggal_diterima');
-            $table->string('pengirim');
-            $table->string('perihal');
-            $table->enum('sifat_surat', ['biasa', 'segera', 'sangat_segera', 'rahasia']);
-            $table->string('lampiran')->nullable();          // file path
-            $table->string('lampiran_nama')->nullable();      // original filename
-            $table->enum('status', ['belum_didisposisi', 'sudah_didisposisi', 'diproses', 'selesai'])
-                  ->default('belum_didisposisi');
-            $table->foreignId('bidang_id')->constrained('bidang')->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->text('catatan')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        Schema::dropIfExists('surat_masuk');
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('surat_masuk');
+        // Tidak ada rollback otomatis — jalankan ulang migration lama
+        // (2024_01_01_000003_create_surat_masuk_table dan
+        // 2024_01_01_000004_create_surat_keluar_table) jika perlu mengembalikan tabel.
     }
 };

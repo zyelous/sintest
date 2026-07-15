@@ -16,57 +16,6 @@ class ArsipController extends Controller
 
         if ($user->isOperator()) {
             $query->where('bidang_id', $user->bidang_id);
-        }
-
-        if ($request->filled('search')) {
-            $s = $request->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('kode_klasifikasi', 'like', "%{$s}%")
-                  ->orWhere('no_berkas', 'like', "%{$s}%")
-                  ->orWhere('uraian_berkas', 'like', "%{$s}%")
-                  ->orWhere('uraian_arsip', 'like', "%{$s}%");
-            });
-        }
-        if ($request->filled('bidang_id') && $user->isAdmin()) {
-            $query->where('bidang_id', $request->bidang_id);
-        }
-        if ($request->filled('klasifikasi_keamanan')) {
-            $query->where('klasifikasi_keamanan', $request->klasifikasi_keamanan);
-        }
-        if ($request->filled('status_retensi')) {
-            $query->where('status_retensi', $request->status_retensi);
-        }
-        if ($request->filled('status_arsip')) {
-            $query->where('status_arsip', $request->status_arsip);
-        }
-
-        $arsipList = $query->latest()->paginate(10)->withQueryString();
-        $bidangList = Bidang::orderBy('nama_bidang')->get();
-
-        // Statistics for operator stat cards
-        $totalArsip = 0;
-        $arsipAktif = 0;
-        $arsipDipinjam = 0;
-        if ($user->isOperator()) {
-            $totalArsip = Arsip::where('bidang_id', $user->bidang_id)->count();
-            $arsipAktif = Arsip::where('bidang_id', $user->bidang_id)->where('status_retensi', 'aktif')->count();
-            $arsipDipinjam = Arsip::where('bidang_id', $user->bidang_id)->where('status_arsip', 'dipinjam')->count();
-        } else {
-            $totalArsip = Arsip::count();
-            $arsipAktif = Arsip::where('status_retensi', 'aktif')->count();
-            $arsipDipinjam = Arsip::where('status_arsip', 'dipinjam')->count();
-        }
-
-        return view('arsip.index', compact('arsipList', 'bidangList', 'totalArsip', 'arsipAktif', 'arsipDipinjam'));
-    }
-
-    public function search(Request $request)
-    {
-        $user = auth()->user();
-        $query = Arsip::with('bidang');
-
-        if ($user->isOperator()) {
-            $query->where('bidang_id', $user->bidang_id);
         } elseif ($request->filled('bidang_id')) {
             $query->where('bidang_id', $request->bidang_id);
         }
@@ -80,12 +29,23 @@ class ArsipController extends Controller
                   ->orWhere('uraian_arsip', 'like', "%{$s}%");
             });
         }
-
         if ($request->filled('kode_klasifikasi')) {
             $query->where('kode_klasifikasi', 'like', "%{$request->kode_klasifikasi}%");
         }
         if ($request->filled('klasifikasi_keamanan')) {
             $query->where('klasifikasi_keamanan', $request->klasifikasi_keamanan);
+        }
+        if ($request->filled('status_retensi')) {
+            $query->where('status_retensi', $request->status_retensi);
+        }
+        if ($request->filled('status_arsip')) {
+            $query->where('status_arsip', $request->status_arsip);
+        }
+        if ($request->filled('no_rak')) {
+            $query->where('no_rak', 'like', "%{$request->no_rak}%");
+        }
+        if ($request->filled('no_boks')) {
+            $query->where('no_boks', 'like', "%{$request->no_boks}%");
         }
         if ($request->filled('dari')) {
             $query->whereDate('tanggal_diarsipkan', '>=', $request->dari);
@@ -93,19 +53,11 @@ class ArsipController extends Controller
         if ($request->filled('sampai')) {
             $query->whereDate('tanggal_diarsipkan', '<=', $request->sampai);
         }
-        if ($request->filled('no_boks')) {
-            $query->where('no_boks', 'like', "%{$request->no_boks}%");
-        }
-        if ($request->filled('no_rak')) {
-            $query->where('no_rak', 'like', "%{$request->no_rak}%");
-        }
 
-        $totalArsip = (clone $query)->count();
         $arsipList = $query->latest()->paginate(10)->withQueryString();
         $bidangList = Bidang::orderBy('nama_bidang')->get();
-        $totalSuratMasuk = \App\Models\SuratMasuk::when($user->isOperator(), fn($q) => $q->where('bidang_id', $user->bidang_id))->whereYear('tanggal_diterima', now()->year)->count();
 
-        return view('arsip.search', compact('arsipList', 'bidangList', 'totalSuratMasuk', 'totalArsip'));
+        return view('arsip.index', compact('arsipList', 'bidangList'));
     }
 
     public function create()
