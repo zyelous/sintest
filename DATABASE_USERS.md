@@ -21,7 +21,7 @@ Pengguna operator untuk Bidang Sekretariat
 
 | Username | Password | Email | Nama | Bidang |
 |----------|----------|-------|------|--------|
-| operator_sekretariat | sekretariat123 | sekretariat@sintara.test | Operator SEKRETARIAT | SEKRETARIAT |
+| sekretariat | sekretariat123 | sekretariat@sintara.test | Operator SEKRETARIAT | SEKRETARIAT |
 
 **Akses**: Fitur operator terbatas pada dokumen Bidang Sekretariat saja
 
@@ -32,11 +32,11 @@ Pengguna operator untuk bidang lain yang tersedia
 
 | Username | Password | Email | Bidang |
 |----------|----------|-------|--------|
-| operator_ekonomi | ekonomi123 | ekonomi@sintara.test | EKONOMI |
-| operator_p3m | p3m123 | p3m@sintara.test | P3M |
-| operator_pik | pik123 | pik@sintara.test | PIK |
-| operator_pmpep | pmpep123 | pmpep@sintara.test | PMPEP |
-| operator_uptd | uptd123 | uptd@sintara.test | UPTD |
+| ekonomi | ekonomi123 | ekonomi@sintara.test | EKONOMI |
+| p3m | p3m123 | p3m@sintara.test | P3M |
+| pik | pik123 | pik@sintara.test | PIK |
+| pmpep | pmpep123 | pmpep@sintara.test | PMPEP |
+| uptd | uptd123 | uptd@sintara.test | UPTD |
 
 ---
 

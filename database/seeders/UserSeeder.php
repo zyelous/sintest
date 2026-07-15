@@ -24,14 +24,13 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Operator per bidang
         $operators = [
-            ['nama' => 'Operator EKONOMI', 'username' => 'operator_ekonomi', 'email' => 'ekonomi@sintara.test', 'password' => 'ekonomi123', 'kode' => 'EKO'],
-            ['nama' => 'Operator P3M', 'username' => 'operator_p3m', 'email' => 'p3m@sintara.test', 'password' => 'p3m123', 'kode' => 'P3M'],
-            ['nama' => 'Operator PIK', 'username' => 'operator_pik', 'email' => 'pik@sintara.test', 'password' => 'pik123', 'kode' => 'PIK'],
-            ['nama' => 'Operator PMPEP', 'username' => 'operator_pmpep', 'email' => 'pmpep@sintara.test', 'password' => 'pmpep123', 'kode' => 'PMP'],
-            ['nama' => 'Operator SEKRETARIAT', 'username' => 'operator_sekretariat', 'email' => 'sekretariat@sintara.test', 'password' => 'sekretariat123', 'kode' => 'SEK'],
-            ['nama' => 'Operator UPTD', 'username' => 'operator_uptd', 'email' => 'uptd@sintara.test', 'password' => 'uptd123', 'kode' => 'UPT'],
+            ['nama' => 'Operator EKONOMI', 'username' => 'ekonomi', 'email' => 'ekonomi@sintara.test', 'password' => 'ekonomi123', 'kode' => 'EKO'],
+            ['nama' => 'Operator P3M', 'username' => 'p3m', 'email' => 'p3m@sintara.test', 'password' => 'p3m123', 'kode' => 'P3M'],
+            ['nama' => 'Operator PIK', 'username' => 'pik', 'email' => 'pik@sintara.test', 'password' => 'pik123', 'kode' => 'PIK'],
+            ['nama' => 'Operator PMPEP', 'username' => 'pmpep', 'email' => 'pmpep@sintara.test', 'password' => 'pmpep123', 'kode' => 'PMP'],
+            ['nama' => 'Operator SEKRETARIAT', 'username' => 'sekretariat', 'email' => 'sekretariat@sintara.test', 'password' => 'sekretariat123', 'kode' => 'SEK'],
+            ['nama' => 'Operator UPTD', 'username' => 'uptd', 'email' => 'uptd@sintara.test', 'password' => 'uptd123', 'kode' => 'UPT'],
         ];
 
         foreach ($operators as $op) {

@@ -26,6 +26,7 @@ class PeminjamanArsip extends Model
         'tanggal_kembali',
         'status',
         'keterangan',
+        'created_by',
     ];
 
     protected function casts(): array
@@ -42,5 +43,13 @@ class PeminjamanArsip extends Model
     public function arsip(): BelongsTo
     {
         return $this->belongsTo(Arsip::class);
+    }
+
+    /**
+     * Relasi: Peminjaman dibuat oleh satu User.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

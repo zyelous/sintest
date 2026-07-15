@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('tanggal_kembali')->nullable();
             $table->enum('status', ['dipinjam', 'dikembalikan'])->default('dipinjam');
             $table->text('keterangan')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }
