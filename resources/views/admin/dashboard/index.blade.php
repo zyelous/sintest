@@ -122,53 +122,111 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-        <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-6 border-b border-slate-200">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Arsip Terbaru Bidang {{ auth()->user()->bidang->nama_bidang ?? '' }}</p>
-                    <h2 class="text-xl font-semibold text-slate-900 mt-2">Daftar Arsip Baru</h2>
+{{-- Two Column Layout: Table + Activity --}}
+<div class="grid gap-6 lg:grid-cols-[1.7fr_1fr] mb-6">
+    {{-- Left: Daftar Arsip Baru --}}
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-w-0">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-b border-slate-100">
+            <div>
+                <h3 class="font-bold text-slate-800 text-base">Daftar Arsip Baru</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Arsip dokumen terbaru di bidang {{ auth()->user()->bidang->nama_bidang ?? 'Anda' }}.</p>
+            </div>
+            <a href="{{ route('admin.arsip.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition shrink-0">
+                Tambah Arsip
+            </a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wide border-b border-slate-100">
+                        <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">No. Berkas</th>
+                        <th class="px-4 py-3 text-left font-semibold">Judul & Perihal</th>
+                        <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Tanggal</th>
+                        <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Lokasi</th>
+                        <th class="px-4 py-3 text-right font-semibold whitespace-nowrap">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($recentArsip->take(4) as $arsip)
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="px-4 py-3.5 font-semibold text-primary text-xs whitespace-nowrap">{{ $arsip->no_berkas }}</td>
+                        <td class="px-4 py-3.5 min-w-0 max-w-[200px]">
+                            <p class="font-semibold text-slate-800 text-xs truncate" title="{{ $arsip->uraian_berkas }}">{{ $arsip->uraian_berkas }}</p>
+                            <p class="text-[0.7rem] text-slate-400 mt-0.5 truncate" title="{{ $arsip->uraian_arsip }}">{{ Str::limit($arsip->uraian_arsip, 60) }}</p>
+                        </td>
+                        <td class="px-4 py-3.5 text-slate-600 text-xs whitespace-nowrap">{{ $arsip->tanggal_diarsipkan?->translatedFormat('d M Y') ?? '-' }}</td>
+                        <td class="px-4 py-3.5 whitespace-nowrap">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[0.75rem]">Rak {{ $arsip->no_rak ?: '-' }}</span>
+                        </td>
+                        <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                            <a href="{{ route('admin.arsip.show', $arsip) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                                Detail
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-5 py-8 text-center text-slate-400 text-xs">Tidak ada arsip terbaru.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 text-xs text-slate-500">
+            Menampilkan {{ count($recentArsip->take(4)) }} dari {{ number_format($recentArsip->count()) }} arsip terbaru.
+        </div>
+    </div>
+
+    {{-- Right: Aktivitas Terakhir --}}
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 min-w-0">
+        <div class="flex items-center gap-2 mb-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B3A5C" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <h3 class="text-base font-bold text-slate-900">Aktivitas Terakhir</h3>
+        </div>
+
+        <div class="relative">
+            {{-- Timeline line --}}
+            <div class="absolute left-[15px] top-2 bottom-2 w-0.5 bg-slate-200"></div>
+
+            <div class="space-y-4">
+                @forelse($recentArsip->take(4) as $idx => $arsip)
+                <div class="relative flex gap-3 pl-0">
+                    <div class="w-8 h-8 rounded-full shrink-0 flex items-center justify-center z-10 {{ $idx === 0 ? 'bg-primary text-white' : 'bg-amber-100 text-amber-600' }}">
+                        @if($idx === 0)
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        @else
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+                        @endif
+                    </div>
+                    <div class="min-w-0 flex-1 pt-0.5">
+                        <p class="text-xs font-semibold text-slate-800 leading-snug truncate" title="{{ $arsip->uraian_berkas }}">{{ $arsip->uraian_berkas }}</p>
+                        <p class="text-[0.7rem] text-slate-400 mt-0.5">{{ $arsip->created_at?->diffForHumans() ?? '-' }}</p>
+                    </div>
                 </div>
-                <a href="{{ route('admin.arsip.index') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-primary text-white hover:bg-primary-light transition">Tambah Arsip</a>
+                @empty
+                <div class="text-center py-6">
+                    <p class="text-xs text-slate-400">Belum ada aktivitas terbaru.</p>
+                </div>
+                @endforelse
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-slate-950 text-white text-xs uppercase tracking-wide">
-                            <th class="px-5 py-3 text-left">No. Berkas</th>
-                            <th class="px-5 py-3 text-left">Judul & Perihal</th>
-                            <th class="px-5 py-3 text-left">Tanggal</th>
-                            <th class="px-5 py-3 text-left">Lokasi Fisik</th>
-                            <th class="px-5 py-3 text-left">Umur Arsip</th>
-                            <th class="px-5 py-3 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($recentArsip->take(4) as $arsip)
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-5 py-4 font-semibold text-primary">{{ $arsip->no_berkas }}</td>
-                            <td class="px-5 py-4">
-                                <p class="font-semibold text-slate-800">{{ $arsip->uraian_berkas }}</p>
-                                <p class="text-xs text-slate-400 mt-1 truncate max-w-[260px]">{{ Str::limit($arsip->uraian_arsip, 80) }}</p>
-                            </td>
-                            <td class="px-5 py-4 text-slate-600 whitespace-nowrap">{{ $arsip->tanggal_diarsipkan?->translatedFormat('d M Y') }}</td>
-                            <td class="px-5 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs">Rak {{ $arsip->no_rak ?: '-' }}</span>
-                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs">Boks {{ $arsip->no_boks ?: '-' }}</span>
-                            </td>
-                            <td class="px-5 py-4 text-slate-600 whitespace-nowrap">{{ $arsip->tanggal_diarsipkan ? $arsip->tanggal_diarsipkan->diffForHumans(['parts' => 1, 'short' => true]) : '-' }}</td>
-                            <td class="px-5 py-4 text-right">
-                                <a href="{{ route('admin.arsip.show', $arsip) }}" class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Detail</a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Tidak ada arsip terbaru.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="px-6 py-4 border-t border-slate-100 text-xs text-slate-500">Menampilkan 4 dari {{ number_format($recentArsip->count()) }} arsip terbaru bidang Anda.</div>
+        </div>
+
+        <a href="{{ route('admin.arsip.index') }}" class="mt-5 flex items-center justify-center w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition">
+            Lihat Semua Aktivitas
+        </a>
+    </div>
+</div>
+
+{{-- Import Modal (overlay) --}}
+<div id="importModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col mx-4">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <h3 class="text-lg font-bold text-slate-800">Preview Import</h3>
+            <button type="button" onclick="cancelImport()" class="text-slate-400 hover:text-slate-600 transition">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
         </div>
         <div class="p-6 overflow-y-auto flex-1">
             <div id="importLoading" class="text-center py-10 text-slate-400 text-sm">Membaca file...</div>

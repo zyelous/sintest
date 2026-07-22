@@ -39,35 +39,40 @@
 </div>
 
 {{-- Filter bar --}}
-<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-6">
-    <form method="GET" action="{{ route('operator.peminjaman.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Cari</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama peminjam, bidang, kode arsip..." class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6">
+    <form method="GET" action="{{ route('operator.peminjaman.index') }}" class="flex flex-wrap lg:flex-nowrap items-end gap-3">
+        <div class="flex-1 min-w-[160px]">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Cari</label>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari peminjam, bidang, kode..." class="w-full px-3 py-2 rounded-lg border-slate-300 text-xs focus:ring-primary focus:border-primary">
         </div>
-        <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Status</label>
-            <select name="status" class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        <div class="w-full sm:w-40 shrink-0">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Status</label>
+            <select name="status" class="w-full px-3 py-2 rounded-lg border-slate-300 text-xs focus:ring-primary focus:border-primary">
                 <option value="">Semua Status</option>
-                <option value="menunggu_persetujuan" {{ request('status') === 'menunggu_persetujuan' ? 'selected' : '' }}>Menunggu Persetujuan</option>
+                <option value="menunggu_persetujuan" {{ request('status') === 'menunggu_persetujuan' ? 'selected' : '' }}>Menunggu</option>
                 <option value="dipinjam" {{ request('status') === 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                 <option value="ditolak" {{ request('status') === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                 <option value="dikembalikan" {{ request('status') === 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
             </select>
         </div>
-        <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tgl Pinjam Dari</label>
-            <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        <div class="w-full sm:w-36 shrink-0">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Tgl Dari</label>
+            <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full px-3 py-2 rounded-lg border-slate-300 text-xs focus:ring-primary focus:border-primary">
         </div>
-        <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tgl Pinjam Sampai</label>
-            <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
+        <div class="w-full sm:w-36 shrink-0">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Tgl Sampai</label>
+            <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full px-3 py-2 rounded-lg border-slate-300 text-xs focus:ring-primary focus:border-primary">
         </div>
-        <div class="sm:col-span-2 lg:col-span-5 flex justify-end gap-2">
+        <div class="flex items-center gap-2 shrink-0">
+            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Filter
+            </button>
             @if(request()->hasAny(['search', 'status', 'tanggal_dari', 'tanggal_sampai', 'bidang_id']))
-            <a href="{{ route('operator.peminjaman.index') }}" class="px-4 py-2.5 text-sm font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">Reset</a>
+            <a href="{{ route('operator.peminjaman.index') }}" class="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-300 text-slate-500 hover:bg-slate-50 transition text-xs font-semibold" title="Reset">
+                Reset
+            </a>
             @endif
-            <button type="submit" class="px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition">Terapkan Filter</button>
         </div>
     </form>
 </div>

@@ -25,16 +25,10 @@
             </div>
 
             <h3 class="text-sm font-bold text-primary mt-6 mb-1">Penanggung Jawab</h3>
-            <p class="text-xs text-slate-400 mb-4 font-medium">Tentukan Kepala Bidang dan tinjau akun operator untuk unit kerja ini.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kepala Bidang (NIP/Nama)</label>
-                    <input type="text" name="kepala_bidang" value="{{ old('kepala_bidang', $bidang->kepala_bidang) }}" placeholder="Contoh: Drs. Budi Santoso, M.Si / NIP. 19780512..." class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Akun Operator Bidang</label>
-                    <input type="text" disabled value="{{ $bidang->operator ? $bidang->operator->name . ' (' . $bidang->operator->username . ')' : 'Belum dibuat (Gunakan Menu Manajemen User)' }}" class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-500 font-medium">
-                </div>
+            <p class="text-xs text-slate-400 mb-4 font-medium">Tentukan Kepala Bidang untuk unit kerja ini.</p>
+            <div class="mb-5">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kepala Bidang (NIP/Nama)</label>
+                <input type="text" name="kepala_bidang" value="{{ old('kepala_bidang', $bidang->kepala_bidang) }}" placeholder="Contoh: Drs. Budi Santoso, M.Si / NIP. 19780512..." class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
             </div>
 
             <div class="mb-6">

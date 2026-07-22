@@ -27,16 +27,10 @@
         </div>
 
         <h3 class="text-sm font-bold text-primary mt-8 mb-1">Penanggung Jawab</h3>
-        <p class="text-xs text-slate-400 mb-4">Tentukan Kepala Bidang atau Operator Utama untuk unit ini (dikelola melalui Manajemen User).</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kepala Bidang (NIP/Nama)</label>
-                <input type="text" name="kepala_bidang" value="{{ old('kepala_bidang') }}" placeholder="Contoh: Drs. Budi Santoso, M.Si / NIP. 19780512..." class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-400 mb-1.5">Operator Utama</label>
-                <input type="text" disabled placeholder="Ditambahkan setelah bidang dibuat" class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-400">
-            </div>
+        <p class="text-xs text-slate-400 mb-4">Tentukan Kepala Bidang untuk unit kerja ini.</p>
+        <div class="mb-5">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kepala Bidang (NIP/Nama)</label>
+            <input type="text" name="kepala_bidang" value="{{ old('kepala_bidang') }}" placeholder="Contoh: Drs. Budi Santoso, M.Si / NIP. 19780512..." class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">
         </div>
 
         <div class="mt-5">

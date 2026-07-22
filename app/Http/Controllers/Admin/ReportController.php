@@ -40,6 +40,8 @@ class ReportController extends Controller
         $arsipAktif = (clone $arsipQuery)->where('status_retensi', 'aktif')->count();
         $arsipInaktif = (clone $arsipQuery)->where('status_retensi', 'inaktif')->count();
 
+        $recentArsip = (clone $arsipQuery)->with('bidang')->latest('tanggal_diarsipkan')->latest('id')->paginate(3)->appends($request->query());
+
         $bidangList = $user->isAdmin() ? Bidang::orderBy('nama_bidang')->get() : collect([$user->bidang])->filter();
 
         $rekap = $bidangList->map(function ($b) {
@@ -60,7 +62,7 @@ class ReportController extends Controller
             ];
         });
 
-        return view('admin.reports.index', compact('totalArsip', 'arsipAktif', 'arsipInaktif', 'rekap', 'bidangList'));
+        return view('admin.reports.index', compact('totalArsip', 'arsipAktif', 'arsipInaktif', 'recentArsip', 'rekap', 'bidangList'));
     }
 
     public function exportExcel(Request $request)
@@ -226,7 +228,7 @@ class ReportController extends Controller
         $bidang = $request->filled('bidang_id') ? Bidang::find($request->bidang_id) : null;
         $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang->nama_bidang : 'SEMUA BIDANG');
 
-        return view('reports.arsip-pdf', compact('arsipList', 'bidangNama'));
+        return view('admin.reports.arsip-pdf', compact('arsipList', 'bidangNama'));
     }
 
     public function importExcel(Request $request)
