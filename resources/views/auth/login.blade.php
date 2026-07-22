@@ -42,11 +42,7 @@
 
 <div class="login-page">
     <section class="login-hero">
-<<<<<<< Updated upstream
-        <img src="{{ asset('images/login_bg.png') }}" alt="Latar SINTARA">
-=======
         <img src="{{ asset('images/loginbg.png') }}" alt="Latar SINTARA">
->>>>>>> Stashed changes
         <div class="brand">
             <p>SINTARA</p>
             <h1>Sistem Informasi Monitoring<br>dan Tracking Arsip</h1>
