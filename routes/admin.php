@@ -66,25 +66,22 @@ Route::middleware(['auth', 'role:admin'])
             [PeminjamanController::class, 'kembalikan'])
             ->name('peminjaman.kembalikan');
 
-        Route::get('/laporan', [ReportController::class, 'index'])
-    ->name('laporan.index');
+        Route::get('/laporan/arsip', [ReportController::class, 'arsip'])
+            ->name('laporan.arsip');
 
-Route::get('/laporan/arsip', [ReportController::class, 'arsip'])
-    ->name('laporan.arsip');
+        Route::get('/laporan/peminjaman', [ReportController::class, 'peminjaman'])
+            ->name('laporan.peminjaman');
 
-Route::get('/laporan/peminjaman', [ReportController::class, 'peminjaman'])
-    ->name('laporan.peminjaman');
+        Route::get('/laporan/arsip/pdf', [ReportController::class, 'arsipPdf'])
+            ->name('laporan.arsip.pdf');
 
-    Route::get('/laporan/arsip/pdf', [ReportController::class, 'arsipPdf'])
-    ->name('laporan.arsip.pdf');
+        Route::get('/laporan/arsip/excel', [ReportController::class, 'arsipExcel'])
+            ->name('laporan.arsip.excel');
 
-Route::get('/laporan/arsip/excel', [ReportController::class, 'arsipExcel'])
-    ->name('laporan.arsip.excel');
+        Route::get('/laporan/peminjaman/pdf', [ReportController::class, 'peminjamanPdf'])
+            ->name('laporan.peminjaman.pdf');
 
-Route::get('/laporan/peminjaman/pdf', [ReportController::class, 'peminjamanPdf'])
-    ->name('laporan.peminjaman.pdf');
+        Route::get('/laporan/peminjaman/excel', [ReportController::class, 'peminjamanExcel'])
+            ->name('laporan.peminjaman.excel');
 
-Route::get('/laporan/peminjaman/excel', [ReportController::class, 'peminjamanExcel'])
-    ->name('laporan.peminjaman.excel');
-
-        });
+    });

@@ -120,22 +120,65 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Peminjaman yang sudah final tidak dapat diedit.');
         }
 
-        $request->validate([
+        $isApproving = $peminjaman->status === 'menunggu_persetujuan';
+        $isReturningPhase = $peminjaman->status === 'dipinjam';
+
+        $rules = [
             'nama_peminjam' => 'required|string|max:255',
             'bidang_peminjam' => 'required|string|max:255',
             'tanggal_pinjam' => 'required|date',
             'tanggal_rencana_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
             'keterangan' => 'nullable|string',
-        ]);
+        ];
 
-        $peminjaman->update($request->only([
-            'nama_peminjam', 'bidang_peminjam', 'tanggal_pinjam', 'tanggal_rencana_kembali', 'keterangan',
-        ]));
+        if ($isApproving) {
+    $rules['paraf_petugas'] = 'required|string';
+}
+if ($isReturningPhase) {
+    $rules['paraf_pengembalian'] = 'nullable|string';
+}
 
-        return redirect()->route('admin.peminjaman.index')->with('success', 'Data peminjaman berhasil diperbarui.');
+        $validated = $request->validate($rules);
+
+        if ($isApproving && $peminjaman->arsip->sedangDipinjam()) {
+            return back()->with('error', 'Arsip ini sudah terlanjur dipinjam pihak lain.')->withInput();
+        }
+
+        DB::transaction(function () use ($peminjaman, $validated, $isApproving, $isReturningPhase) {
+            $peminjaman->update([
+                'nama_peminjam' => $validated['nama_peminjam'],
+                'bidang_peminjam' => $validated['bidang_peminjam'],
+                'tanggal_pinjam' => $validated['tanggal_pinjam'],
+                'tanggal_rencana_kembali' => $validated['tanggal_rencana_kembali'],
+                'keterangan' => $validated['keterangan'] ?? null,
+            ]);
+
+            if ($isApproving) {
+                // Paraf petugas diisi -> otomatis setujui peminjaman
+                $peminjaman->update([
+                    'status' => 'dipinjam',
+                    'paraf_petugas' => $validated['paraf_petugas'],
+                ]);
+                $peminjaman->arsip->update(['status_arsip' => 'dipinjam']);
+            } elseif ($isReturningPhase && !empty($validated['paraf_pengembalian'])) {
+                // Paraf pengembalian diisi -> otomatis tandai dikembalikan
+                $peminjaman->update([
+                    'status' => 'dikembalikan',
+                    'paraf_pengembalian' => $validated['paraf_pengembalian'],
+                    'tanggal_kembali' => now()->toDateString(),
+                ]);
+                $peminjaman->arsip->update(['status_arsip' => 'tersedia']);
+            }
+        });
+
+        $message = $isApproving
+            ? 'Peminjaman berhasil disetujui.'
+            : 'Data peminjaman berhasil diperbarui.';
+
+        return redirect()->route('admin.peminjaman.index')->with('success', $message);
     }
 
-    public function approve(PeminjamanArsip $peminjaman)
+    public function approve(Request $request, PeminjamanArsip $peminjaman)
     {
         if ($peminjaman->status !== 'menunggu_persetujuan') {
             return back()->with('error', 'Peminjaman ini sudah diproses sebelumnya.');
@@ -144,8 +187,15 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Arsip ini sudah terlanjur dipinjam pihak lain.');
         }
 
-        DB::transaction(function () use ($peminjaman) {
-            $peminjaman->update(['status' => 'dipinjam']);
+        $request->validate([
+            'paraf_petugas' => 'required|string',
+        ]);
+
+        DB::transaction(function () use ($peminjaman, $request) {
+            $peminjaman->update([
+                'status' => 'dipinjam',
+                'paraf_petugas' => $request->paraf_petugas,
+            ]);
             $peminjaman->arsip->update(['status_arsip' => 'dipinjam']);
         });
 

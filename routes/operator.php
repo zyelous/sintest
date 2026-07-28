@@ -6,7 +6,7 @@ use App\Http\Controllers\Operator\DashboardController;
 use App\Http\Controllers\Operator\ArsipController;
 use App\Http\Controllers\Operator\PeminjamanController;
 
-Route::middleware(['auth', 'role:operator'])
+Route::middleware(['auth', 'role:admin,operator'])
     ->prefix('operator')
     ->name('operator.')
     ->group(function () {

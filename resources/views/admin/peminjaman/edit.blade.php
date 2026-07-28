@@ -21,7 +21,7 @@
         <p class="text-sm text-slate-600">{{ $peminjaman->arsip->uraian_berkas }}</p>
     </div>
 
-    <form method="POST" action="{{ route('admin.peminjaman.update', $peminjaman) }}">
+    <form method="POST" action="{{ route('admin.peminjaman.update', $peminjaman) }}" id="editPeminjamanForm">
         @csrf @method('PUT')
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
@@ -46,6 +46,65 @@
                 @error('tanggal_rencana_kembali')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
 
+            {{-- Paraf Peminjam: sudah diisi operator saat pengajuan, tampil read-only, ukuran penuh --}}
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Peminjam</label>
+                <div class="rounded-xl border border-slate-200 bg-white p-2 relative">
+                    @if($peminjaman->paraf_peminjam)
+                        <img src="{{ $peminjaman->paraf_peminjam }}" alt="Paraf Peminjam" class="w-full h-40 object-contain rounded-lg bg-white">
+                        <span class="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600" title="Sudah ditandatangani">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                    @else
+                        <div class="w-full h-40 flex items-center justify-center rounded-lg bg-slate-50 text-xs text-slate-400">Belum ada paraf peminjam</div>
+                    @endif
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Paraf ini diisi oleh peminjam saat pengajuan dan tidak dapat diubah dari sini.</p>
+            </div>
+
+            {{-- Paraf Petugas Arsip: canvas signature pad, wajib diisi saat menyetujui --}}
+            @if($peminjaman->status === 'menunggu_persetujuan')
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Petugas Arsip <span class="text-red-500">*</span></label>
+                <div class="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-2 relative">
+                    <canvas id="sigPetugas" class="w-full h-40 bg-white rounded-lg touch-none"></canvas>
+                    <button type="button" onclick="clearSig('sigPetugas','paraf_petugas')" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50" title="Hapus paraf">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z"/></svg>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Tanda tangan/paraf petugas langsung di area di atas. Menyimpan paraf ini otomatis menyetujui peminjaman.</p>
+                <input type="hidden" name="paraf_petugas" id="paraf_petugas" value="{{ old('paraf_petugas') }}">
+                @error('paraf_petugas')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+            </div>
+            @endif
+
+            {{-- Saat sudah dipinjam: tampilkan paraf petugas yg sudah tersimpan + canvas paraf pengembalian --}}
+            @if($peminjaman->status === 'dipinjam')
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Petugas Arsip</label>
+                <div class="rounded-xl border border-slate-200 bg-white p-2">
+                    @if($peminjaman->paraf_petugas)
+                        <img src="{{ $peminjaman->paraf_petugas }}" alt="Paraf Petugas" class="w-full h-40 object-contain rounded-lg bg-white">
+                    @else
+                        <div class="w-full h-40 flex items-center justify-center rounded-lg bg-slate-50 text-xs text-slate-400">Belum ada paraf petugas</div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Pengembalian Petugas</label>
+                <div class="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-2 relative">
+                    <canvas id="sigPengembalian" class="w-full h-40 bg-white rounded-lg touch-none"></canvas>
+                    <button type="button" onclick="clearSig('sigPengembalian','paraf_pengembalian')" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50" title="Hapus paraf">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z"/></svg>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Kosongkan jika arsip belum benar-benar dikembalikan. Jika diisi, status otomatis jadi "Dikembalikan".</p>
+                <input type="hidden" name="paraf_pengembalian" id="paraf_pengembalian" value="{{ old('paraf_pengembalian') }}">
+                @error('paraf_pengembalian')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+            </div>
+            @endif
+
             <div class="sm:col-span-2">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Keterangan</label>
                 <textarea name="keterangan" rows="2" class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">{{ old('keterangan', $peminjaman->keterangan) }}</textarea>
@@ -58,4 +117,57 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.6/signature_pad.umd.min.js"></script>
+<script>
+    const sigPads = {};
+
+    function initSignaturePad(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext('2d').scale(ratio, ratio);
+        sigPads[canvasId] = new SignaturePad(canvas, {
+            backgroundColor: 'rgb(255,255,255)',
+            penColor: 'rgb(15,23,42)'
+        });
+    }
+
+    function clearSig(canvasId, hiddenInputId) {
+        sigPads[canvasId].clear();
+        document.getElementById(hiddenInputId).value = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        @if($peminjaman->status === 'menunggu_persetujuan')
+        initSignaturePad('sigPetugas');
+        @endif
+        @if($peminjaman->status === 'dipinjam')
+        initSignaturePad('sigPengembalian');
+        @endif
+
+        document.getElementById('editPeminjamanForm').addEventListener('submit', function (e) {
+            @if($peminjaman->status === 'menunggu_persetujuan')
+            const petugasPad = sigPads['sigPetugas'];
+            if (petugasPad.isEmpty()) {
+                e.preventDefault();
+                alert('Paraf petugas wajib diisi untuk menyetujui peminjaman.');
+                return;
+            }
+            document.getElementById('paraf_petugas').value = petugasPad.toDataURL('image/png');
+            @endif
+
+            @if($peminjaman->status === 'dipinjam')
+            const pengembalianPad = sigPads['sigPengembalian'];
+            if (pengembalianPad && !pengembalianPad.isEmpty()) {
+                document.getElementById('paraf_pengembalian').value = pengembalianPad.toDataURL('image/png');
+            }
+            @endif
+        });
+    });
+</script>
+@endpush
 @endsection

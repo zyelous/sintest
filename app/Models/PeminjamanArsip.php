@@ -23,17 +23,23 @@ class PeminjamanArsip extends Model
         'nama_peminjam',
         'bidang_peminjam',
         'tanggal_pinjam',
+        'tanggal_rencana_kembali',
         'tanggal_kembali',
+        'jumlah',
+        'paraf_peminjam',
+        'paraf_petugas',
         'status',
         'keterangan',
         'created_by',
+        'paraf_pengembalian',
     ];
 
     protected function casts(): array
     {
         return [
-            'tanggal_pinjam'   => 'date',
-            'tanggal_kembali'  => 'date',
+            'tanggal_pinjam'          => 'date',
+            'tanggal_rencana_kembali' => 'date',
+            'tanggal_kembali'         => 'date',
         ];
     }
 

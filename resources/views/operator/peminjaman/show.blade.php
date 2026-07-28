@@ -39,6 +39,10 @@
                 </div>
             </div>
             <div>
+                <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Jumlah</p>
+                <p class="text-sm text-slate-700 mt-0.5">{{ $peminjaman->jumlah ?? '-' }}</p>
+            </div>
+            <div>
                 <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Tanggal Kembali (Aktual)</p>
                 <p class="text-sm text-slate-700 mt-0.5">{{ $peminjaman->tanggal_kembali?->format('d F Y') ?? '-' }}</p>
             </div>
@@ -94,6 +98,35 @@
                 <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Bidang Arsip</p>
                 <p class="text-sm text-slate-700 mt-0.5">{{ $peminjaman->arsip->bidang->nama_bidang ?? '-' }}</p>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- Paraf Digital --}}
+<div class="mt-6 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-800">Paraf</h3>
+    </div>
+    <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+            <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide mb-2">Paraf Peminjam</p>
+            @if($peminjaman->paraf_peminjam)
+                <div class="border border-slate-200 rounded-lg bg-slate-50 p-3 inline-block">
+                    <img src="{{ $peminjaman->paraf_peminjam }}" alt="Paraf peminjam" class="h-24 bg-white rounded">
+                </div>
+            @else
+                <p class="text-sm text-slate-400 italic">Belum ada paraf.</p>
+            @endif
+        </div>
+        <div>
+            <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide mb-2">Paraf Petugas/Arsiparis</p>
+            @if($peminjaman->paraf_petugas)
+                <div class="border border-slate-200 rounded-lg bg-slate-50 p-3 inline-block">
+                    <img src="{{ $peminjaman->paraf_petugas }}" alt="Paraf petugas" class="h-24 bg-white rounded">
+                </div>
+            @else
+                <p class="text-sm text-slate-400 italic">Belum ada paraf.</p>
+            @endif
         </div>
     </div>
 </div>

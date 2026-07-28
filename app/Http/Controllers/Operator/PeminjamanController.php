@@ -70,6 +70,8 @@ class PeminjamanController extends Controller
             'bidang_peminjam' => 'required|string|max:255',
             'tanggal_pinjam' => 'required|date',
             'tanggal_rencana_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+            'jumlah' => 'required|integer|min:1',
+            'paraf_peminjam' => 'required|string',
             'keterangan' => 'nullable|string',
         ]);
 
@@ -88,6 +90,9 @@ class PeminjamanController extends Controller
             'bidang_peminjam' => $request->bidang_peminjam,
             'tanggal_pinjam' => $request->tanggal_pinjam,
             'tanggal_rencana_kembali' => $request->tanggal_rencana_kembali,
+            'jumlah' => $request->jumlah,
+            'paraf_peminjam' => $request->paraf_peminjam,
+            // paraf_petugas sengaja tidak diisi di sini — diisi Admin saat approve().
             'keterangan' => $request->keterangan,
             'status' => 'menunggu_persetujuan',
             'created_by' => auth()->id(),
@@ -129,12 +134,22 @@ class PeminjamanController extends Controller
             'bidang_peminjam' => 'required|string|max:255',
             'tanggal_pinjam' => 'required|date',
             'tanggal_rencana_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+            'jumlah' => 'required|integer|min:1',
+            'paraf_peminjam' => 'nullable|string',
             'keterangan' => 'nullable|string',
         ]);
 
-        $peminjaman->update($request->only([
-            'nama_peminjam', 'bidang_peminjam', 'tanggal_pinjam', 'tanggal_rencana_kembali', 'keterangan',
-        ]));
+        $peminjaman->update([
+            'nama_peminjam' => $request->nama_peminjam,
+            'bidang_peminjam' => $request->bidang_peminjam,
+            'tanggal_pinjam' => $request->tanggal_pinjam,
+            'tanggal_rencana_kembali' => $request->tanggal_rencana_kembali,
+            'jumlah' => $request->jumlah,
+            'keterangan' => $request->keterangan,
+            // Paraf peminjam hanya diganti kalau operator gambar ulang di canvas (request tidak kosong).
+            'paraf_peminjam' => $request->filled('paraf_peminjam') ? $request->paraf_peminjam : $peminjaman->paraf_peminjam,
+            // paraf_petugas tidak disentuh sama sekali di sini — murni domain Admin.
+        ]);
 
         return redirect()->route('operator.peminjaman.index')->with('success', 'Data peminjaman berhasil diperbarui.');
     }

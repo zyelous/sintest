@@ -89,6 +89,7 @@
                     <th class="px-5 py-3 text-left font-semibold">Bidang Peminjam</th>
                     <th class="px-5 py-3 text-left font-semibold">Tgl Pinjam</th>
                     <th class="px-5 py-3 text-left font-semibold">Rencana Kembali</th>
+                    <th class="px-5 py-3 text-center font-semibold">Jumlah</th>
                     <th class="px-5 py-3 text-center font-semibold">Status</th>
                     <th class="px-5 py-3 text-center font-semibold">Aksi</th>
                 </tr>
@@ -106,6 +107,7 @@
                     <td class="px-5 py-3.5 text-slate-600">{{ $p->bidang_peminjam }}</td>
                     <td class="px-5 py-3.5 text-slate-600 whitespace-nowrap">{{ $p->tanggal_pinjam->format('d/m/Y') }}</td>
                     <td class="px-5 py-3.5 text-slate-600 whitespace-nowrap">{{ $p->tanggal_rencana_kembali?->format('d/m/Y') ?? '-' }}</td>
+                    <td class="px-5 py-3.5 text-center text-slate-600">{{ $p->jumlah ?? '-' }}</td>
                     <td class="px-5 py-3.5 text-center">
                         @if($p->status === 'menunggu_persetujuan')
                             <span class="inline-block px-3 py-1.5 rounded-full text-[0.7rem] font-bold bg-amber-100 text-amber-700">MENUNGGU PERSETUJUAN</span>
@@ -153,7 +155,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" class="px-5 py-10 text-center text-slate-400">Tidak ada data peminjaman.</td></tr>
+                <tr><td colspan="9" class="px-5 py-10 text-center text-slate-400">Tidak ada data peminjaman.</td></tr>
                 @endforelse
             </tbody>
         </table>

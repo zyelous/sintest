@@ -135,12 +135,9 @@
                             </a>
 
                             @if($p->status === 'menunggu_persetujuan')
-                            <form method="POST" action="{{ route('admin.peminjaman.approve', $p) }}" class="inline">
-                                @csrf @method('PUT')
-                                <button type="submit" title="Setujui" onclick="return confirm('Setujui peminjaman ini?')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                </button>
-                            </form>
+                            <a href="{{ route('admin.peminjaman.edit', $p) }}" title="Setujui (isi paraf di halaman edit)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            </a>
                             <form method="POST" action="{{ route('admin.peminjaman.reject', $p) }}" class="inline">
                                 @csrf @method('PUT')
                                 <button type="submit" title="Tolak" onclick="return confirm('Tolak peminjaman ini?')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">
