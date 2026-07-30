@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Mencegah browser menyimpan cache halaman (mencegah isu tombol Back setelah logout/ganti akun)
+        $middleware->web(append: [
+            \App\Http\Middleware\PreventBackHistory::class,
+        ]);
+
         // Daftarkan alias middleware 'role' untuk pembatasan akses per role
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

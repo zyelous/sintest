@@ -21,7 +21,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kode Klasifikasi <span class="text-red-500">*</span></label>
-                        <input type="text" name="kode_klasifikasi" value="{{ old('kode_klasifikasi') }}" required placeholder="Contoh: 000.3" class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('kode_klasifikasi') border-red-400 @enderror">
+                        <input type="text" id="kode_klasifikasi_input" name="kode_klasifikasi" value="{{ old('kode_klasifikasi') }}" required placeholder="Contoh: 050.1" class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('kode_klasifikasi') border-red-400 @enderror">
                         @error('kode_klasifikasi')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
@@ -60,7 +60,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Uraian Informasi Berkas <span class="text-red-500">*</span></label>
-                        <textarea name="uraian_berkas" rows="3" required placeholder="Tuliskan uraian informasi berkas..." class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('uraian_berkas') border-red-400 @enderror">{{ old('uraian_berkas') }}</textarea>
+                        <textarea name="uraian_berkas" id="uraian_berkas_input" rows="3" required placeholder="Tuliskan uraian informasi berkas..." class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('uraian_berkas') border-red-400 @enderror">{{ old('uraian_berkas') }}</textarea>
                         @error('uraian_berkas')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
@@ -168,4 +168,5 @@
         </div>
     </div>
 </form>
+
 @endsection

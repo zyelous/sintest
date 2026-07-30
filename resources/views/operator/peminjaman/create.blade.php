@@ -14,78 +14,88 @@
     <p class="text-sm text-slate-500 mt-0.5">Catat peminjaman arsip fisik sesuai Buku Peminjaman Arsip.</p>
 </div>
 
-<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-3xl">
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 w-full">
     <form method="POST" action="{{ route('operator.peminjaman.store') }}" id="pinjamForm">
         @csrf
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div class="sm:col-span-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="md:col-span-2 lg:col-span-3">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Pilih Arsip <span class="text-red-500">*</span></label>
                 <select name="arsip_id" required class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('arsip_id') border-red-400 @enderror">
                     <option value="">-- Pilih Arsip yang Tersedia --</option>
                     @foreach($arsipTersedia as $a)
-                    <option value="{{ $a->id }}" {{ old('arsip_id') == $a->id ? 'selected' : '' }}>[{{ $a->kode_klasifikasi }}] {{ $a->no_berkas }} - {{ Str::limit($a->uraian_berkas, 60) }}</option>
+                    <option value="{{ $a->id }}" {{ old('arsip_id') == $a->id ? 'selected' : '' }}>[{{ $a->kode_klasifikasi }}] {{ $a->no_berkas }} - {{ Str::limit($a->uraian_berkas, 80) }}</option>
                     @endforeach
                 </select>
                 @error('arsip_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 @if($arsipTersedia->isEmpty())<p class="text-xs text-slate-400 mt-1">Tidak ada arsip yang tersedia untuk dipinjam.</p>@endif
             </div>
 
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Peminjam <span class="text-red-500">*</span></label>
                 <input type="text" name="nama_peminjam" value="{{ old('nama_peminjam') }}" required class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('nama_peminjam') border-red-400 @enderror">
                 @error('nama_peminjam')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
-            <div>
+            <div class="col-span-1 md:col-span-1 lg:col-span-2">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Unit Kerja/Bidang Peminjam <span class="text-red-500">*</span></label>
-                <input type="text" name="bidang_peminjam" value="{{ old('bidang_peminjam') }}" required class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('bidang_peminjam') border-red-400 @enderror">
+                <select name="bidang_peminjam" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-primary focus:border-primary bg-white @error('bidang_peminjam') border-red-400 @enderror">
+                    <option value="">-- Pilih Unit/Bidang --</option>
+                    @foreach($bidangList as $bidang)
+                        <option value="{{ $bidang->nama_bidang }}" {{ old('bidang_peminjam') == $bidang->nama_bidang ? 'selected' : '' }}>
+                            {{ $bidang->nama_bidang }}
+                        </option>
+                    @endforeach
+                </select>
                 @error('bidang_peminjam')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Peminjaman <span class="text-red-500">*</span></label>
                 <input type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', date('Y-m-d')) }}" required class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('tanggal_pinjam') border-red-400 @enderror">
                 @error('tanggal_pinjam')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal Rencana Kembali <span class="text-red-500">*</span></label>
                 <input type="date" name="tanggal_rencana_kembali" value="{{ old('tanggal_rencana_kembali') }}" required class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('tanggal_rencana_kembali') border-red-400 @enderror">
                 @error('tanggal_rencana_kembali')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jumlah <span class="text-red-500">*</span></label>
                 <input type="number" name="jumlah" min="1" value="{{ old('jumlah', 1) }}" required class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary @error('jumlah') border-red-400 @enderror">
                 @error('jumlah')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
-            <div class="sm:col-span-2">
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Peminjam <span class="text-red-500">*</span></label>
-                <div class="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-2 relative">
-                    <canvas id="sigPeminjam" class="w-full h-40 bg-white rounded-lg touch-none"></canvas>
-                    <button type="button" onclick="clearSig('sigPeminjam','paraf_peminjam')" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50" title="Hapus paraf">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z"/></svg>
-                    </button>
+
+            <div class="md:col-span-2 lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Peminjam <span class="text-red-500">*</span></label>
+                    <div class="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-2 relative">
+                        <canvas id="sigPeminjam" class="w-full h-44 bg-white rounded-lg touch-none"></canvas>
+                        <button type="button" onclick="clearSig('sigPeminjam','paraf_peminjam')" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 shadow-sm" title="Hapus paraf">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z"/></svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Tanda tangan/paraf peminjam langsung di area di atas.</p>
+                    <input type="hidden" name="paraf_peminjam" id="paraf_peminjam" value="{{ old('paraf_peminjam') }}">
+                    @error('paraf_peminjam')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
-                <p class="text-xs text-slate-400 mt-1">Tanda tangan/paraf peminjam langsung di area di atas.</p>
-                <input type="hidden" name="paraf_peminjam" id="paraf_peminjam" value="{{ old('paraf_peminjam') }}">
-                @error('paraf_peminjam')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Petugas/Arsiparis</label>
+                    <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 h-44 flex items-center justify-center">
+                        <p class="text-xs text-slate-400 text-center">Paraf petugas akan diisi oleh Admin saat memproses persetujuan peminjaman ini.</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="sm:col-span-2">
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Paraf Petugas/Arsiparis</label>
-                <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 flex items-center justify-center">
-                    <p class="text-xs text-slate-400 text-center">Paraf petugas akan diisi oleh Admin saat memproses persetujuan peminjaman ini.</p>
-                </div>
-            </div>
-
-            <div class="sm:col-span-2">
+            <div class="md:col-span-2 lg:col-span-3">
                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Keterangan</label>
                 <textarea name="keterangan" rows="2" class="w-full px-3.5 py-2.5 rounded-lg border-slate-300 text-sm focus:ring-primary focus:border-primary">{{ old('keterangan') }}</textarea>
             </div>
         </div>
 
-        <div class="flex justify-end gap-3 mt-6 pt-5 border-t border-slate-100">
-            <a href="{{ route('operator.peminjaman.index') }}" class="px-5 py-2.5 text-sm font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">Batal</a>
-            <button type="submit" class="px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition">Simpan Peminjaman</button>
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-6 pt-5 border-t border-slate-100">
+            <a href="{{ route('operator.peminjaman.index') }}" class="w-full sm:w-auto text-center px-5 py-2.5 text-sm font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">Batal</a>
+            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition shadow-sm">Simpan Peminjaman</button>
         </div>
     </form>
 </div>
@@ -97,20 +107,48 @@
 
     function initSignaturePad(canvasId) {
         const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        if (!sigPads[canvasId]) {
+            sigPads[canvasId] = new SignaturePad(canvas, {
+                backgroundColor: 'rgb(255,255,255)',
+                penColor: 'rgb(15,23,42)'
+            });
+        }
+        resizeCanvas(canvasId);
+    }
+
+    function resizeCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const pad = sigPads[canvasId];
+        let data = null;
+        if (pad && !pad.isEmpty()) {
+            data = pad.toData();
+        }
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        canvas.width = rect.width * ratio;
+        canvas.height = rect.height * ratio;
         canvas.getContext('2d').scale(ratio, ratio);
-        sigPads[canvasId] = new SignaturePad(canvas, {
-            backgroundColor: 'rgb(255,255,255)',
-            penColor: 'rgb(15,23,42)'
-        });
+        if (pad) {
+            pad.clear();
+            if (data) pad.fromData(data);
+        }
     }
 
     function clearSig(canvasId, hiddenInputId) {
-        sigPads[canvasId].clear();
-        document.getElementById(hiddenInputId).value = '';
+        if (sigPads[canvasId]) {
+            sigPads[canvasId].clear();
+        }
+        const input = document.getElementById(hiddenInputId);
+        if (input) input.value = '';
     }
+
+    window.addEventListener('resize', function () {
+        Object.keys(sigPads).forEach(id => resizeCanvas(id));
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         initSignaturePad('sigPeminjam');

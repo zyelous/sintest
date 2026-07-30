@@ -3,11 +3,11 @@
 @section('title', 'Tambah User')
 
 @section('breadcrumb')
-    <a href="{{ route('admin.dashboard') }}" class="text-slate-500 hover:text-blue-500 font-medium">Dashboard</a>
-    <span class="text-slate-300">/</span>
-    <a href="{{ route('admin.users.index') }}" class="text-slate-500 hover:text-blue-500 font-medium">Manajemen User</a>
-    <span class="text-slate-300">/</span>
-    <span class="text-slate-800 font-semibold">Tambah User</span>
+    <a href="{{ route('admin.dashboard') }}" class="hover:text-primary">Dashboard</a>
+    <span>/</span>
+    <a href="{{ route('admin.bidang.index', ['tab' => 'user']) }}" class="hover:text-primary">Manajemen Bidang & User</a>
+    <span>/</span>
+    <span class="text-slate-700 font-medium">Tambah User</span>
 @endsection
 
 @section('content')
@@ -139,7 +139,7 @@
 
                 {{-- Actions --}}
                 <div class="flex items-center justify-end gap-3 mt-8 pt-5 border-t border-slate-100">
-                    <a href="{{ route('admin.users.index') }}"
+                    <a href="{{ route('admin.bidang.index', ['tab' => 'user']) }}"
                        class="px-4 py-2 text-sm font-semibold rounded-lg transition border border-slate-300 text-slate-600 hover:bg-slate-50">
                         Batal
                     </a>

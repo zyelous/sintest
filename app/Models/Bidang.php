@@ -28,6 +28,8 @@ class Bidang extends Model
     protected $fillable = [
         'nama_bidang',
         'kode_bidang',
+        'kepala_bidang',
+        'deskripsi',
     ];
 
     /**
@@ -36,6 +38,14 @@ class Bidang extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /**
+     * Relasi: Operator utama di bidang ini.
+     */
+    public function operator(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(User::class)->where('role', 'operator');
     }
 
     /**

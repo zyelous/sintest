@@ -10,37 +10,20 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+use App\Models\PasswordResetRequest;
+
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with('bidang');
-
-        if ($request->filled('search')) {
-            $s = $request->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('username', 'like', "%{$s}%")
-                  ->orWhere('email', 'like', "%{$s}%");
-            });
-        }
-        if ($request->filled('role')) {
-            $query->where('role', $request->role);
-        }
-        if ($request->filled('bidang_id')) {
-            $query->where('bidang_id', $request->bidang_id);
-        }
-
-        $userList = $query->latest()->paginate(10)->withQueryString();
-        $bidangList = Bidang::orderBy('nama_bidang')->get();
-
-        return view('users.index', compact('userList', 'bidangList'));
+        $params = array_merge(['tab' => 'user'], $request->query());
+        return redirect()->route('admin.bidang.index', $params);
     }
 
     public function create()
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
-        return view('users.create', compact('bidangList'));
+        return view('admin.users.create', compact('bidangList'));
     }
 
     public function store(StoreUserRequest $request)
@@ -55,13 +38,13 @@ class UserController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ]);
 
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
+        return redirect()->route('admin.bidang.index', ['tab' => 'user'])->with('success', 'User berhasil ditambahkan.');
     }
 
     public function edit(User $user)
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
-        return view('users.edit', compact('user', 'bidangList'));
+        return view('admin.users.edit', compact('user', 'bidangList'));
     }
 
     public function update(UpdateUserRequest $request, User $user)
@@ -80,7 +63,7 @@ class UserController extends Controller
         }
 
         $user->update($data);
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
+        return redirect()->route('admin.bidang.index', ['tab' => 'user'])->with('success', 'User berhasil diperbarui.');
     }
 
     public function destroy(User $user)
@@ -89,12 +72,42 @@ class UserController extends Controller
             return back()->with('error', 'Tidak dapat menghapus akun sendiri.');
         }
         $user->delete();
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
+        return redirect()->route('admin.bidang.index', ['tab' => 'user'])->with('success', 'User berhasil dihapus.');
     }
 
     public function resetPassword(User $user)
     {
         $user->update(['password' => Hash::make('password123')]);
+
+        // Close any pending reset request for this user
+        PasswordResetRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'approved', 'resolved_at' => now()]);
+
         return back()->with('success', "Password {$user->name} berhasil direset ke 'password123'.");
+    }
+
+    public function approveResetRequest(PasswordResetRequest $resetRequest)
+    {
+        if ($resetRequest->user) {
+            $resetRequest->user->update(['password' => Hash::make('password123')]);
+        }
+
+        $resetRequest->update([
+            'status' => 'approved',
+            'resolved_at' => now(),
+        ]);
+
+        return back()->with('success', "Permintaan reset password untuk {$resetRequest->username} berhasil disetujui. Password telah direset ke 'password123'.");
+    }
+
+    public function rejectResetRequest(PasswordResetRequest $resetRequest)
+    {
+        $resetRequest->update([
+            'status' => 'rejected',
+            'resolved_at' => now(),
+        ]);
+
+        return back()->with('success', "Permintaan reset password untuk {$resetRequest->username} telah ditolak.");
     }
 }

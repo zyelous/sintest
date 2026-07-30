@@ -31,27 +31,42 @@
             <span>Peminjaman Arsip</span>
         </a>
 
-        @if(auth()->user()->isAdmin())
-        <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 mb-1 rounded-lg text-sm font-semibold transition {{ request()->routeIs('admin.laporan.*') ? 'bg-accent-gold text-primary-dark' : 'text-white/70 hover:text-white hover:bg-white/[0.08]' }}">
+        <a href="{{ route($rp.'laporan.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 mb-1 rounded-lg text-sm font-semibold transition {{ request()->routeIs('admin.laporan.*', 'operator.laporan.*') ? 'bg-accent-gold text-primary-dark' : 'text-white/70 hover:text-white hover:bg-white/[0.08]' }}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            <span>Laporan</span>
+            <span>Laporan Rekapitulasi</span>
         </a>
 
-        <a href="{{ route('admin.bidang.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 mb-1 rounded-lg text-sm font-semibold transition {{ request()->routeIs('admin.bidang.*') ? 'bg-accent-gold text-primary-dark' : 'text-white/70 hover:text-white hover:bg-white/[0.08]' }}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/><circle cx="18" cy="6" r="2.2" opacity=".6"/></svg>
-            <span>Manajemen Bidang</span>
+        @if(auth()->user()->isAdmin())
+        @php
+            $pendingResetCount = \App\Models\PasswordResetRequest::where('status', 'pending')->count();
+        @endphp
+        <a href="{{ route('admin.bidang.index') }}" class="flex items-center justify-between px-3.5 py-2.5 mb-1 rounded-lg text-sm font-semibold transition {{ request()->routeIs('admin.bidang.*', 'admin.users.*') ? 'bg-accent-gold text-primary-dark' : 'text-white/70 hover:text-white hover:bg-white/[0.08]' }}">
+            <div class="flex items-center gap-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/><circle cx="18" cy="6" r="2.2" opacity=".6"/></svg>
+                <span>Manajemen Pengguna</span>
+            </div>
+            @if($pendingResetCount > 0)
+                <span class="px-2 py-0.5 text-[0.65rem] font-extrabold bg-red-500 text-white rounded-full animate-pulse" title="{{ $pendingResetCount }} permintaan reset password">{{ $pendingResetCount }}</span>
+            @endif
         </a>
         @endif
+
+        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3.5 py-2.5 mb-1 rounded-lg text-sm font-semibold transition {{ request()->routeIs('profile.*') ? 'bg-accent-gold text-primary-dark' : 'text-white/70 hover:text-white hover:bg-white/[0.08]' }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profil Saya</span>
+        </a>
     </nav>
 
     {{-- Footer --}}
     <div class="px-5 py-4 border-t border-white/10 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold shrink-0 ring-1 ring-white/15">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
-            <div class="min-w-0 flex-1">
-                <p class="text-xs font-semibold text-white truncate">{{ auth()->user()->name }}</p>
-                <p class="text-[0.65rem] text-white/50">{{ auth()->user()->isAdmin() ? 'Administrator Utama' : 'Operator Bidang' }}</p>
-            </div>
+            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 min-w-0 flex-1 group">
+                <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold shrink-0 ring-1 ring-white/15 group-hover:bg-white/20 transition">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-semibold text-white truncate group-hover:text-amber-300 transition">{{ auth()->user()->name }}</p>
+                    <p class="text-[0.65rem] text-white/50">{{ auth()->user()->isAdmin() ? 'Administrator Utama' : 'Operator Bidang' }}</p>
+                </div>
+            </a>
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" title="Logout" class="p-1.5 rounded-md text-white/50 hover:text-white hover:bg-white/10 transition">

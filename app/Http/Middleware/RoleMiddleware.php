@@ -26,8 +26,30 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!auth()->check() || !in_array(auth()->user()->role, $roles)) {
-            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $user = auth()->user();
+
+        if (!$user->is_active) {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'username' => 'Sesi Anda dihentikan karena akun telah dinonaktifkan.',
+            ]);
+        }
+
+        if (!in_array($user->role, $roles)) {
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard')
+                    ->with('error', 'Anda tidak memiliki akses ke halaman operator.');
+            }
+
+            return redirect()->route('operator.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke halaman administrator.');
         }
 
         return $next($request);

@@ -8,13 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('peminjaman_arsip', function (Blueprint $table) {
-            $table->foreignId('created_by')
-                ->nullable()
-                ->after('paraf_petugas')
-                ->constrained('users')
-                ->nullOnDelete();
-        });
+        if (!Schema::hasColumn('peminjaman_arsip', 'created_by')) {
+            Schema::table('peminjaman_arsip', function (Blueprint $table) {
+                $table->foreignId('created_by')
+                    ->nullable()
+                    ->after('paraf_petugas')
+                    ->constrained('users')
+                    ->nullOnDelete();
+            });
+        }
     }
 
     public function down(): void

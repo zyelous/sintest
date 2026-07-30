@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Arsip;
 use App\Models\Bidang;
+use App\Models\PeminjamanArsip;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -40,7 +41,7 @@ class ReportController extends Controller
         $arsipAktif = (clone $arsipQuery)->where('status_retensi', 'aktif')->count();
         $arsipInaktif = (clone $arsipQuery)->where('status_retensi', 'inaktif')->count();
 
-        $recentArsip = (clone $arsipQuery)->with('bidang')->latest('tanggal_diarsipkan')->latest('id')->paginate(3)->appends($request->query());
+        $recentArsip = (clone $arsipQuery)->with('bidang')->latest('tanggal_diarsipkan')->latest('id')->paginate(10)->appends($request->query());
 
         $bidangList = $user->isAdmin() ? Bidang::orderBy('nama_bidang')->get() : collect([$user->bidang])->filter();
 
@@ -65,6 +66,197 @@ class ReportController extends Controller
         return view('admin.reports.index', compact('totalArsip', 'arsipAktif', 'arsipInaktif', 'recentArsip', 'rekap', 'bidangList'));
     }
 
+    // Laporan Data Arsip
+    public function arsip(Request $request)
+    {
+        $user = auth()->user();
+        $query = Arsip::with(['bidang', 'user']);
+
+        if ($user->isOperator()) {
+            $query->where('bidang_id', $user->bidang_id);
+        } elseif ($request->filled('bidang_id')) {
+            $query->where('bidang_id', $request->bidang_id);
+        }
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('kode_klasifikasi', 'like', "%{$s}%")
+                  ->orWhere('no_berkas', 'like', "%{$s}%")
+                  ->orWhere('uraian_berkas', 'like', "%{$s}%")
+                  ->orWhere('uraian_arsip', 'like', "%{$s}%");
+            });
+        }
+
+        if ($request->filled('klasifikasi_keamanan')) {
+            $query->where('klasifikasi_keamanan', $request->klasifikasi_keamanan);
+        }
+        if ($request->filled('status_retensi')) {
+            $query->where('status_retensi', $request->status_retensi);
+        }
+        if ($request->filled('status_arsip')) {
+            $query->where('status_arsip', $request->status_arsip);
+        }
+        if ($request->filled('dari')) {
+            $query->whereDate('tanggal_diarsipkan', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $query->whereDate('tanggal_diarsipkan', '<=', $request->sampai);
+        }
+
+        $arsipList = $query->latest('tanggal_diarsipkan')->paginate(15)->withQueryString();
+        $bidangList = $user->isAdmin() ? Bidang::orderBy('nama_bidang')->get() : collect([$user->bidang])->filter();
+
+        return view('admin.reports.arsip', compact('arsipList', 'bidangList'));
+    }
+
+    public function arsipPdf(Request $request)
+    {
+        return $this->exportPdf($request);
+    }
+
+    public function arsipExcel(Request $request)
+    {
+        return $this->exportExcel($request);
+    }
+
+    // Laporan Peminjaman Arsip
+    public function peminjaman(Request $request)
+    {
+        $user = auth()->user();
+        $query = PeminjamanArsip::with(['arsip.bidang', 'creator']);
+
+        if ($user->isOperator()) {
+            $query->whereHas('arsip', fn($q) => $q->where('bidang_id', $user->bidang_id));
+        } elseif ($request->filled('bidang_id')) {
+            $query->whereHas('arsip', fn($q) => $q->where('bidang_id', $request->bidang_id));
+        }
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('nama_peminjam', 'like', "%{$s}%")
+                  ->orWhere('bidang_peminjam', 'like', "%{$s}%")
+                  ->orWhereHas('arsip', fn($aq) => $aq->where('no_berkas', 'like', "%{$s}%")
+                      ->orWhere('uraian_berkas', 'like', "%{$s}%"));
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('dari')) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->sampai);
+        }
+
+        $peminjamanList = $query->latest('tanggal_pinjam')->paginate(15)->withQueryString();
+        $bidangList = $user->isAdmin() ? Bidang::orderBy('nama_bidang')->get() : collect([$user->bidang])->filter();
+
+        return view('admin.reports.peminjaman', compact('peminjamanList', 'bidangList'));
+    }
+
+    public function peminjamanPdf(Request $request)
+    {
+        $user = auth()->user();
+        $query = PeminjamanArsip::with(['arsip.bidang', 'creator']);
+
+        if ($user->isOperator()) {
+            $query->whereHas('arsip', fn($q) => $q->where('bidang_id', $user->bidang_id));
+        } elseif ($request->filled('bidang_id')) {
+            $query->whereHas('arsip', fn($q) => $q->where('bidang_id', $request->bidang_id));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('dari')) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->sampai);
+        }
+
+        $peminjamanList = $query->latest('tanggal_pinjam')->get();
+        $bidang = $request->filled('bidang_id') ? Bidang::find($request->bidang_id) : null;
+        $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang?->nama_bidang : 'SEMUA BIDANG');
+
+        return view('admin.reports.peminjaman-pdf', compact('peminjamanList', 'bidangNama'));
+    }
+
+    public function peminjamanExcel(Request $request)
+    {
+        $user = auth()->user();
+        $query = PeminjamanArsip::with(['arsip.bidang', 'creator']);
+
+        if ($user->isOperator()) {
+            $query->whereHas('arsip', fn($q) => $q->where('bidang_id', $user->bidang_id));
+        } elseif ($request->filled('bidang_id')) {
+            $query->whereHas('arsip', fn($q) => $q->where('bidang_id', $request->bidang_id));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('dari')) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->sampai);
+        }
+
+        $peminjamanList = $query->latest('tanggal_pinjam')->get();
+        $bidang = $request->filled('bidang_id') ? Bidang::find($request->bidang_id) : null;
+        $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang?->nama_bidang : 'SEMUA BIDANG');
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Laporan Peminjaman');
+
+        // Judul & Kop
+        $sheet->setCellValue('A1', 'LAPORAN REKAPITULASI PEMINJAMAN ARSIP');
+        $sheet->setCellValue('A2', 'BAPPEDA PROVINSI LAMPUNG - UNIT PENGOLAH: ' . strtoupper($bidangNama));
+        $sheet->mergeCells("A1:H1");
+        $sheet->mergeCells("A2:H2");
+        $sheet->getStyle('A1:A2')->getFont()->setBold(true);
+        $sheet->getStyle('A1')->getSize(14);
+
+        // Header Table
+        $headers = ['No', 'No. Berkas', 'Judul / Uraian Arsip', 'Nama Peminjam', 'Bidang Peminjam', 'Tgl Pinjam', 'Tgl Rencana Kembali', 'Status'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        foreach ($headers as $idx => $label) {
+            $sheet->setCellValue($cols[$idx] . '4', $label);
+        }
+        $sheet->getStyle('A4:H4')->getFont()->setBold(true);
+        $sheet->getStyle('A4:H4')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('D9E2F3');
+
+        $row = 5;
+        foreach ($peminjamanList as $index => $item) {
+            $sheet->setCellValue("A{$row}", $index + 1);
+            $sheet->setCellValue("B{$row}", $item->arsip?->no_berkas ?? '-');
+            $sheet->setCellValue("C{$row}", $item->arsip?->uraian_berkas ?? '-');
+            $sheet->setCellValue("D{$row}", $item->nama_peminjam);
+            $sheet->setCellValue("E{$row}", $item->bidang_peminjam);
+            $sheet->setCellValue("F{$row}", $item->tanggal_pinjam?->format('d-m-Y'));
+            $sheet->setCellValue("G{$row}", $item->tanggal_rencana_kembali?->format('d-m-Y'));
+            $sheet->setCellValue("H{$row}", ucfirst(str_replace('_', ' ', $item->status)));
+            $row++;
+        }
+
+        $widths = ['A' => 6, 'B' => 18, 'C' => 35, 'D' => 20, 'E' => 20, 'F' => 15, 'G' => 18, 'H' => 18];
+        foreach ($widths as $col => $w) {
+            $sheet->getColumnDimension($col)->setWidth($w);
+        }
+
+        $filename = 'laporan_peminjaman_arsip_' . date('Ymd_His') . '.xlsx';
+        $tempPath = storage_path('app/temp_' . uniqid() . '.xlsx');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($tempPath);
+
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+    }
+
     public function exportExcel(Request $request)
     {
         $user = auth()->user();
@@ -76,19 +268,26 @@ class ReportController extends Controller
             $query->where('bidang_id', $request->bidang_id);
         }
 
+        if ($request->filled('klasifikasi_keamanan')) {
+            $query->where('klasifikasi_keamanan', $request->klasifikasi_keamanan);
+        }
+        if ($request->filled('status_retensi')) {
+            $query->where('status_retensi', $request->status_retensi);
+        }
+
         $arsipList = $query->orderBy('kode_klasifikasi')->get();
         $bidang = $request->filled('bidang_id') ? Bidang::find($request->bidang_id) : null;
-        $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang->nama_bidang : 'SEMUA BIDANG');
+        $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang?->nama_bidang : 'SEMUA BIDANG');
         $showBidangColumn = !$bidang && !$user->isOperator();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Daftar Arsip Aktif');
+        $sheet->setTitle('Daftar Arsip');
 
         $lastCol = $showBidangColumn ? 'U' : 'T';
 
         // Judul
-        $sheet->setCellValue('A1', 'DAFTAR ARSIP AKTIF ' . strtoupper($bidangNama));
+        $sheet->setCellValue('A1', 'DAFTAR REKAPITULASI ARSIP BAPPEDA ' . strtoupper($bidangNama));
         $sheet->mergeCells("A1:{$lastCol}1");
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -99,7 +298,7 @@ class ReportController extends Controller
         $sheet->setCellValue('A3', 'Unit Pengolah');
         $sheet->setCellValue('B3', ': ' . $bidangNama);
         $sheet->setCellValue('A4', 'Unit Kearsipan');
-        $sheet->setCellValue('B4', ': Sekretariat');
+        $sheet->setCellValue('B4', ': Sekretariat Bappeda');
         $sheet->getStyle('A2:A4')->getFont()->setBold(true);
 
         // Header tabel (baris 6-7, merge cell)
@@ -175,13 +374,13 @@ class ReportController extends Controller
             $sheet->setCellValue("K{$row}", $arsip->no_rak);
             $sheet->setCellValue("L{$row}", $arsip->no_boks);
             $sheet->setCellValue("M{$row}", $arsip->no_folder);
-            $sheet->setCellValue("N{$row}", $arsip->klasifikasi_keamanan === 'biasa');
-            $sheet->setCellValue("O{$row}", $arsip->klasifikasi_keamanan === 'terbatas');
-            $sheet->setCellValue("P{$row}", $arsip->klasifikasi_keamanan === 'rahasia');
-            $sheet->setCellValue("Q{$row}", $arsip->klasifikasi_keamanan === 'sangat_rahasia');
-            $sheet->setCellValue("R{$row}", $arsip->status_retensi === 'aktif' && empty($arsip->nasib_akhir));
-            $sheet->setCellValue("S{$row}", $arsip->status_retensi === 'inaktif' && empty($arsip->nasib_akhir));
-            $sheet->setCellValue("T{$row}", !empty($arsip->nasib_akhir));
+            $sheet->setCellValue("N{$row}", $arsip->klasifikasi_keamanan === 'biasa' ? 'V' : '');
+            $sheet->setCellValue("O{$row}", $arsip->klasifikasi_keamanan === 'terbatas' ? 'V' : '');
+            $sheet->setCellValue("P{$row}", $arsip->klasifikasi_keamanan === 'rahasia' ? 'V' : '');
+            $sheet->setCellValue("Q{$row}", $arsip->klasifikasi_keamanan === 'sangat_rahasia' ? 'V' : '');
+            $sheet->setCellValue("R{$row}", $arsip->status_retensi === 'aktif' ? 'V' : '');
+            $sheet->setCellValue("S{$row}", $arsip->status_retensi === 'inaktif' ? 'V' : '');
+            $sheet->setCellValue("T{$row}", $arsip->nasib_akhir ?: '-');
             if ($showBidangColumn) {
                 $sheet->setCellValue("U{$row}", $arsip->bidang?->nama_bidang);
             }
@@ -199,14 +398,13 @@ class ReportController extends Controller
                 ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         }
 
-        // Lebar kolom
         $widths = ['A' => 14, 'B' => 20, 'C' => 40, 'D' => 12, 'E' => 10, 'F' => 14, 'G' => 30, 'H' => 16, 'I' => 12, 'J' => 16, 'K' => 8, 'L' => 8, 'M' => 8, 'N' => 8, 'O' => 9, 'P' => 9, 'Q' => 10, 'R' => 8, 'S' => 8, 'T' => 10, 'U' => 18];
         foreach ($widths as $col => $w) {
             $sheet->getColumnDimension($col)->setWidth($w);
         }
         $sheet->freezePane("A" . ($headerRow2 + 1));
 
-        $filename = 'daftar_arsip_aktif_' . strtolower(str_replace(' ', '_', $bidangNama)) . '_' . date('Ymd') . '.xlsx';
+        $filename = 'daftar_arsip_' . strtolower(str_replace(' ', '_', $bidangNama)) . '_' . date('Ymd_His') . '.xlsx';
         $tempPath = storage_path('app/temp_' . uniqid() . '.xlsx');
         (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($tempPath);
 
@@ -224,97 +422,17 @@ class ReportController extends Controller
             $query->where('bidang_id', $request->bidang_id);
         }
 
-        $arsipList = $query->orderBy('kode_klasifikasi')->get();
-        $bidang = $request->filled('bidang_id') ? Bidang::find($request->bidang_id) : null;
-        $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang->nama_bidang : 'SEMUA BIDANG');
-
-        return view('admin.reports.arsip-pdf', compact('arsipList', 'bidangNama'));
-    }
-
-    public function importExcel(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt,xls,xlsx|max:10240',
-        ]);
-
-        $file = $request->file('file');
-        $handle = fopen($file->getRealPath(), 'r');
-        $header = null;
-        $imported = 0;
-        $skipped = 0;
-        $lineNum = 0;
-
-        while (($row = fgetcsv($handle)) !== false) {
-            $lineNum++;
-            // Skip header rows (first 6 lines typically)
-            if ($lineNum <= 6) continue;
-
-            // Skip empty rows
-            if (empty(array_filter($row))) continue;
-
-            // Expected columns: No, Kode Klasifikasi, No. Berkas, Uraian Berkas, ...
-            if (count($row) < 8) {
-                $skipped++;
-                continue;
-            }
-
-            try {
-                Arsip::create([
-                    'kode_klasifikasi' => $row[1] ?? '',
-                    'no_berkas' => $row[2] ?? '',
-                    'uraian_berkas' => $row[3] ?? '',
-                    'kurun_waktu' => $row[4] ?? null,
-                    'jumlah_berkas' => $row[5] ?? '1',
-                    'no_item_arsip' => $row[6] ?? null,
-                    'uraian_arsip' => $row[7] ?? null,
-                    'tanggal_diarsipkan' => now(),
-                    'klasifikasi_keamanan' => 'biasa',
-                    'status_retensi' => 'aktif',
-                    'status_arsip' => 'tersedia',
-                    'bidang_id' => auth()->user()->isOperator() ? auth()->user()->bidang_id : (Bidang::first()->id ?? 1),
-                    'user_id' => auth()->id(),
-                ]);
-                $imported++;
-            } catch (\Exception $e) {
-                $skipped++;
-            }
+        if ($request->filled('klasifikasi_keamanan')) {
+            $query->where('klasifikasi_keamanan', $request->klasifikasi_keamanan);
+        }
+        if ($request->filled('status_retensi')) {
+            $query->where('status_retensi', $request->status_retensi);
         }
 
-        fclose($handle);
+        $arsipList = $query->orderBy('kode_klasifikasi')->get();
+        $bidang = $request->filled('bidang_id') ? Bidang::find($request->bidang_id) : null;
+        $bidangNama = $bidang ? $bidang->nama_bidang : ($user->isOperator() ? $user->bidang?->nama_bidang : 'SEMUA BIDANG');
 
-        return redirect()->route('admin.arsip.index')
-            ->with('success', "Import selesai: {$imported} data berhasil, {$skipped} data dilewati.");
-    }
-
-    // laporan arsip
-    public function arsip(Request $request)
-    {
-
-    }
-
-    public function arsipPdf(Request $request)
-    {
-
-    }
-
-    public function arsipExcel(Request $request)
-    {
-
-    }
-
-    // laporan peminjaman
-    public function peminjaman(Request $request)
-    {
-
-    }
-
-    public function peminjamanPdf(Request $request)
-    {
-
-    }
-
-    public function peminjamanExcel(Request $request)
-    {
-
+        return view('admin.reports.arsip-pdf', compact('arsipList', 'bidangNama'));
     }
 }

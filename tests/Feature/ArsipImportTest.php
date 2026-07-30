@@ -86,10 +86,10 @@ class ArsipImportTest extends TestCase
     {
         $file = $this->createFakeTsvFile();
 
-        $this->post(route('arsip.preview'), ['file' => $file])
+        $this->post(route('admin.arsip.preview'), ['file' => $file])
             ->assertRedirect(route('login'));
 
-        $this->post(route('arsip.import'), ['file' => $file])
+        $this->post(route('admin.arsip.import'), ['file' => $file])
             ->assertRedirect(route('login'));
     }
 
@@ -98,7 +98,7 @@ class ArsipImportTest extends TestCase
         $this->actingAs($this->admin);
         $file = $this->createFakeTsvFile();
 
-        $response = $this->post(route('arsip.preview'), ['file' => $file]);
+        $response = $this->post(route('admin.arsip.preview'), ['file' => $file]);
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -122,7 +122,7 @@ class ArsipImportTest extends TestCase
         $this->actingAs($this->admin);
         $file = $this->createFakeTsvFile();
 
-        $response = $this->post(route('arsip.import'), [
+        $response = $this->post(route('admin.arsip.import'), [
             'file' => $file,
             'bidang_id' => $this->bidangEko->id
         ]);
@@ -145,7 +145,7 @@ class ArsipImportTest extends TestCase
         $file = $this->createFakeTsvFile();
 
         // Even if operator tries to specify another bidang_id, it should be ignored and set to their own
-        $response = $this->post(route('arsip.import'), [
+        $response = $this->post(route('operator.arsip.import'), [
             'file' => $file,
             'bidang_id' => $this->bidangEko->id
         ]);
@@ -170,7 +170,7 @@ class ArsipImportTest extends TestCase
         
         $file = UploadedFile::fake()->create('document.pdf', 100);
 
-        $response = $this->post(route('arsip.preview'), ['file' => $file]);
+        $response = $this->post(route('admin.arsip.preview'), ['file' => $file]);
 
         $response->assertStatus(422)
             ->assertJson([

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Tambah Bidang')
 @section('breadcrumb')
-<a href="{{ route('admin.dashboard') }}" class="hover:text-primary">Manajemen</a> <span>/</span> <a href="{{ route('admin.bidang.index') }}" class="hover:text-primary">Daftar Bidang</a> <span>/</span> <span class="text-slate-700 font-medium">Tambah Bidang</span>
+<a href="{{ route('admin.dashboard') }}" class="hover:text-primary">Dashboard</a> <span>/</span> <a href="{{ route('admin.bidang.index', ['tab' => 'bidang']) }}" class="hover:text-primary">Manajemen Bidang & User</a> <span>/</span> <span class="text-slate-700 font-medium">Tambah Bidang</span>
 @endsection
 @section('content')
 
@@ -39,7 +39,7 @@
         </div>
 
         <div class="flex items-center justify-end gap-3 mt-8 pt-5 border-t border-slate-100">
-            <a href="{{ route('admin.bidang.index') }}" class="px-4 py-2.5 text-sm font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">Batal</a>
+            <a href="{{ route('admin.bidang.index', ['tab' => 'bidang']) }}" class="px-4 py-2.5 text-sm font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">Batal</a>
             <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-light transition shadow-sm">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Simpan Bidang

@@ -48,8 +48,32 @@ class PeminjamanArsip extends Model
      */
     public function getDurasiPinjamAttribute(): string
     {
-        $end = $this->tanggal_kembali ?? now();
-        $diff = $this->tanggal_pinjam->diff($end);
+        // 1. Jika sudah dikembalikan
+        if ($this->tanggal_kembali) {
+            $start = $this->tanggal_pinjam->startOfDay();
+            $end = $this->tanggal_kembali->startOfDay();
+            $diffDays = (int) $start->diffInDays($end);
+            return $diffDays === 0 ? '1 hari' : $diffDays . ' hari';
+        }
+
+        // 2. Jika masih aktif dipinjam
+        $tanggalPinjamStr = $this->tanggal_pinjam ? \Carbon\Carbon::parse($this->tanggal_pinjam)->format('Y-m-d') : null;
+        $createdAtStr = $this->created_at ? \Carbon\Carbon::parse($this->created_at)->format('Y-m-d') : null;
+
+        // Jika tanggal_pinjam sama dengan tanggal created_at, gunakan created_at agar hitungan jam & menit presisi dari waktu pengajuan/pembuatan
+        if ($createdAtStr && $tanggalPinjamStr === $createdAtStr) {
+            $start = \Carbon\Carbon::parse($this->created_at);
+        } else {
+            $start = \Carbon\Carbon::parse($this->tanggal_pinjam)->startOfDay();
+        }
+
+        $end = now();
+
+        if ($start->isFuture()) {
+            return 'belum dimulai';
+        }
+
+        $diff = $start->diff($end);
 
         $totalDays = $diff->days;
         $weeks = floor($totalDays / 7);
@@ -79,6 +103,16 @@ class PeminjamanArsip extends Model
     }
 
     /**
+     * Accessor: Cek apakah peminjaman ini terlambat dikembalikan.
+     */
+    public function getTerlambatAttribute(): bool
+    {
+        return $this->status === 'dipinjam'
+            && $this->tanggal_rencana_kembali
+            && $this->tanggal_rencana_kembali->endOfDay()->isPast();
+    }
+
+    /**
      * Relasi: Peminjaman milik satu Arsip.
      */
     public function arsip(): BelongsTo
@@ -90,6 +124,14 @@ class PeminjamanArsip extends Model
      * Relasi: Peminjaman dibuat oleh satu User.
      */
     public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Alias Relasi: User pembuat transaksi peminjaman.
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }

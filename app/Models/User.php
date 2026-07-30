@@ -82,4 +82,12 @@ class User extends Authenticatable
     {
         return $this->role === 'operator';
     }
+
+    /**
+     * Relasi ke pengajuan reset password.
+     */
+    public function passwordResetRequests()
+    {
+        return $this->hasMany(PasswordResetRequest::class);
+    }
 }

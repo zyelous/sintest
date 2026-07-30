@@ -9,9 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('peminjaman_arsip', function (Blueprint $table) {
-            $table->unsignedInteger('jumlah')->default(1)->after('tanggal_rencana_kembali');
-            $table->longText('paraf_peminjam')->nullable()->after('keterangan');
-            $table->longText('paraf_petugas')->nullable()->after('paraf_peminjam');
+            if (!Schema::hasColumn('peminjaman_arsip', 'jumlah')) {
+                $table->unsignedInteger('jumlah')->default(1)->after('tanggal_rencana_kembali');
+            }
+            if (!Schema::hasColumn('peminjaman_arsip', 'paraf_peminjam')) {
+                $table->longText('paraf_peminjam')->nullable()->after('keterangan');
+            }
+            if (!Schema::hasColumn('peminjaman_arsip', 'paraf_petugas')) {
+                $table->longText('paraf_petugas')->nullable()->after('paraf_peminjam');
+            }
         });
     }
 

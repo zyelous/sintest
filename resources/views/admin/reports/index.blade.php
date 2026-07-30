@@ -5,7 +5,7 @@
 <h1 class="text-2xl font-bold text-slate-800 mb-6">Laporan Rekapitulasi</h1>
 
 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-6">
-    <form method="GET" action="{{ route('admin.laporan.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+    <form method="GET" action="{{ route(auth()->user()->isAdmin() ? 'admin.laporan.index' : 'operator.laporan.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
         <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1.5">Periode Tanggal</label>
             <div class="flex items-center gap-2">
@@ -33,7 +33,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 Tampilkan
             </button>
-            <a href="{{ route('admin.laporan.index') }}" class="inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-slate-300 text-slate-500 hover:bg-slate-50 transition" title="Reset">
+            <a href="{{ route(auth()->user()->isAdmin() ? 'admin.laporan.index' : 'operator.laporan.index') }}" class="inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-slate-300 text-slate-500 hover:bg-slate-50 transition" title="Reset">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
             </a>
         </div>
@@ -190,11 +190,11 @@
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h3 class="font-semibold text-slate-800">Data Rekapitulasi Bidang</h3>
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.report.arsip.pdf') }}{{ request('bidang_id') ? '?bidang_id=' . request('bidang_id') : '' }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">
+                <a href="{{ route(auth()->user()->isAdmin() ? 'admin.laporan.arsip.pdf' : 'operator.laporan.arsip.pdf') }}{{ request('bidang_id') ? '?bidang_id=' . request('bidang_id') : '' }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 transition">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     Export PDF
                 </a>
-                <a href="{{ route('admin.report.arsip.excel') }}{{ request('bidang_id') ? '?bidang_id=' . request('bidang_id') : '' }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
+                <a href="{{ route(auth()->user()->isAdmin() ? 'admin.laporan.arsip.excel' : 'operator.laporan.arsip.excel') }}{{ request('bidang_id') ? '?bidang_id=' . request('bidang_id') : '' }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
                     Excel (.xlsx)
                 </a>
@@ -264,7 +264,7 @@
         <div class="bg-primary rounded-xl p-5 text-white">
             <h3 class="font-semibold text-sm mb-2">Laporan Tahunan</h3>
             <p class="text-xs text-white/60 mb-4">Unduh kompilasi data arsip tahun {{ date('Y') }} dalam format resmi buku laporan.</p>
-            <a href="{{ route('admin.report.arsip.pdf') }}" target="_blank" class="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 text-sm font-semibold rounded-lg bg-accent-gold text-primary-dark hover:bg-accent-gold-dark transition">
+            <a href="{{ route(auth()->user()->isAdmin() ? 'admin.laporan.arsip.pdf' : 'operator.laporan.arsip.pdf') }}" target="_blank" class="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 text-sm font-semibold rounded-lg bg-accent-gold text-primary-dark hover:bg-accent-gold-dark transition">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Download Laporan {{ date('Y') }}
             </a>

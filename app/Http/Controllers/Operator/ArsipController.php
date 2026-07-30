@@ -174,6 +174,13 @@ class ArsipController extends Controller
         return Storage::disk('public')->download($arsip->file_arsip);
     }
 
+    public function printLabel(Arsip $arsip)
+    {
+        $this->authorizeBidang($arsip);
+        $arsip->load(['bidang', 'user']);
+        return view('admin.arsip.print-label', compact('arsip'));
+    }
+
     private function authorizeBidang(Arsip $arsip): void
     {
         if ($arsip->bidang_id !== auth()->user()->bidang_id) {

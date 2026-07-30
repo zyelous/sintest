@@ -56,9 +56,12 @@
                     @elseif($peminjaman->status === 'dikembalikan')
                         <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-700">DIKEMBALIKAN</span>
                     @elseif($peminjaman->terlambat)
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">TERLAMBAT ({{ $peminjaman->tanggal_rencana_kembali->diffInDays(now()) }} hari dari rencana)</span>
+                        @php
+                            $hariTerlambat = (int) \Carbon\Carbon::now()->diff($peminjaman->tanggal_rencana_kembali)->days;
+                        @endphp
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">TERLAMBAT ({{ $hariTerlambat }} hari dari rencana)</span>
                     @else
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">DISETUJUI ({{ $peminjaman->tanggal_pinjam->diffInDays(now()) }} hari)</span>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">DISETUJUI ({{ $peminjaman->durasi_pinjam }})</span>
                     @endif
                 </p>
             </div>

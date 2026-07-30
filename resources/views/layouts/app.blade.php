@@ -9,6 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* Sembunyikan ikon mata bawaan browser (Edge/Chrome) agar tidak muncul 2 mata */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none !important;
+        }
+    </style>
 </head>
 <body class="font-sans antialiased bg-slate-100 text-slate-800">
     <div class="flex min-h-screen">
@@ -73,6 +80,13 @@
     }
     // Auto-dismiss flash
     setTimeout(() => { document.getElementById('flashMsg')?.remove(); }, 5000);
+
+    // Mencegah menampilkan halaman cache ketika tombol Back di-klik setelah logout/pindah akun
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+            window.location.reload();
+        }
+    });
     </script>
     @stack('scripts')
 </body>

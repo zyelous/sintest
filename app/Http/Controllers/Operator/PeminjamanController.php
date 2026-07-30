@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
 use App\Models\Arsip;
+use App\Models\Bidang;
 use App\Models\PeminjamanArsip;
+use App\Models\User;
+use App\Notifications\PeminjamanDiajukan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -58,8 +61,9 @@ class PeminjamanController extends Controller
         $arsipTersedia = Arsip::where('status_arsip', 'tersedia')
             ->where('bidang_id', $user->bidang_id)
             ->orderBy('kode_klasifikasi')->get();
+        $bidangList = Bidang::orderBy('nama_bidang')->get();
 
-        return view('operator.peminjaman.create', compact('arsipTersedia'));
+        return view('operator.peminjaman.create', compact('arsipTersedia', 'bidangList'));
     }
 
     public function store(Request $request)
@@ -84,7 +88,7 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Arsip sedang dipinjam oleh pihak lain.')->withInput();
         }
 
-        PeminjamanArsip::create([
+        $peminjaman = PeminjamanArsip::create([
             'arsip_id' => $arsip->id,
             'nama_peminjam' => $request->nama_peminjam,
             'bidang_peminjam' => $request->bidang_peminjam,
@@ -97,6 +101,13 @@ class PeminjamanController extends Controller
             'status' => 'menunggu_persetujuan',
             'created_by' => auth()->id(),
         ]);
+
+        // Kirim notifikasi ke semua admin
+        $peminjaman->load('arsip');
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new PeminjamanDiajukan($peminjaman));
+        }
 
         return redirect()->route('operator.peminjaman.index')->with('success', 'Peminjaman arsip berhasil diajukan, menunggu persetujuan.');
     }
@@ -118,8 +129,9 @@ class PeminjamanController extends Controller
             ->where('bidang_id', auth()->user()->bidang_id)
             ->orWhere('id', $peminjaman->arsip_id)
             ->orderBy('kode_klasifikasi')->get();
+        $bidangList = Bidang::orderBy('nama_bidang')->get();
 
-        return view('operator.peminjaman.edit', compact('peminjaman', 'arsipTersedia'));
+        return view('operator.peminjaman.edit', compact('peminjaman', 'arsipTersedia', 'bidangList'));
     }
 
     public function update(Request $request, PeminjamanArsip $peminjaman)

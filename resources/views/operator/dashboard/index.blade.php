@@ -5,35 +5,55 @@
 @endsection
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-xl font-bold text-slate-800">Selamat datang, {{ auth()->user()->name }}</h1>
-    <p class="text-sm text-slate-500 mt-0.5">Ringkasan arsip dan peminjaman di bidang Anda.</p>
+
+{{-- Hero Banner --}}
+<div class="grid gap-6 mb-6">
+    <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-white shadow-2xl">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.35),_transparent_25%)]"></div>
+        <div class="absolute -right-8 top-10 h-48 w-48 rounded-full bg-slate-700/40 blur-3xl"></div>
+        <div class="relative p-8 sm:p-10 lg:p-12">
+            <p class="text-sm uppercase tracking-[0.28em] text-sky-300/80 font-semibold mb-3">Ringkasan Bidang</p>
+            <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">
+                {{ auth()->user()->bidang->nama_bidang ?? 'Bidang Saya' }}
+            </h1>
+            <p class="mt-3 max-w-2xl text-slate-300 text-sm sm:text-base">
+                Selamat datang, <span class="font-semibold text-white">{{ auth()->user()->name }}</span>.
+                Kelola arsip dan peminjaman bidang Anda dengan data terkini.
+            </p>
+
+            <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-[1.5rem] bg-slate-950/60 border border-white/10 p-4 sm:p-5">
+                    <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Total Arsip</p>
+                    <p class="mt-2 text-2xl sm:text-3xl font-bold">{{ number_format($totalArsip) }}</p>
+                </div>
+                <div class="rounded-[1.5rem] bg-slate-950/60 border border-white/10 p-4 sm:p-5">
+                    <p class="text-xs uppercase tracking-[0.2em] text-emerald-400">Aktif / Inaktif</p>
+                    <p class="mt-2 text-2xl sm:text-3xl font-bold">
+                        {{ number_format($arsipAktif) }}
+                        <span class="text-sm font-normal text-slate-400">/ {{ number_format($arsipInaktif) }}</span>
+                    </p>
+                </div>
+                <div class="rounded-[1.5rem] bg-slate-950/60 border border-white/10 p-4 sm:p-5">
+                    <p class="text-xs uppercase tracking-[0.2em] text-amber-400">Sedang Dipinjam</p>
+                    <p class="mt-2 text-2xl sm:text-3xl font-bold">{{ number_format($arsipDipinjam) }}</p>
+                </div>
+                <div class="rounded-[1.5rem] bg-slate-950/60 border border-white/10 p-4 sm:p-5">
+                    <p class="text-xs uppercase tracking-[0.2em] text-red-400">Pinjaman Terlambat</p>
+                    <p class="mt-2 text-2xl sm:text-3xl font-bold {{ $peminjamanTerlambat > 0 ? 'text-red-400' : 'text-white' }}">
+                        {{ number_format($peminjamanTerlambat) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-{{-- Stat cards --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Total Arsip</p>
-        <p class="text-3xl font-bold text-slate-800 mt-1">{{ number_format($totalArsip) }}</p>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Arsip Aktif</p>
-        <p class="text-3xl font-bold text-primary mt-1">{{ number_format($arsipAktif) }}</p>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Sedang Dipinjam</p>
-        <p class="text-3xl font-bold text-amber-600 mt-1">{{ number_format($arsipDipinjam) }}</p>
-    </div>
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <p class="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wide">Jumlah Boks</p>
-        <p class="text-3xl font-bold text-slate-800 mt-1">{{ number_format($totalBoks) }}</p>
-    </div>
-</div>
-
+{{-- Two Column Layout: Chart + Activity --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     {{-- Chart --}}
     <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <h3 class="font-semibold text-slate-800 mb-4">Arsip Masuk 6 Bulan Terakhir</h3>
+        <h3 class="font-semibold text-slate-800 mb-1">Arsip Masuk 6 Bulan Terakhir</h3>
+        <p class="text-xs text-slate-400 mb-4">Analitik bulanan penambahan arsip di bidang Anda.</p>
         <canvas id="growthChart" height="90"></canvas>
     </div>
 
@@ -113,6 +133,7 @@ new Chart(document.getElementById('growthChart'), {
             data: {!! json_encode(array_column($monthlyGrowth, 'count')) !!},
             backgroundColor: '#1B3A5C',
             borderRadius: 6,
+            maxBarThickness: 48,
         }]
     },
     options: {
